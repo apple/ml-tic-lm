@@ -1,0 +1,250 @@
+epoch: 1.25T
+dataset: bigdata
+num_params: 1B
+max_seq_len: 512
+seed: 1
+precision: fp32
+apply_sampling: true
+sampling_seed: 42
+
+# Tokenizer
+tokenizer:
+  # name: [Add name from memory]
+  pretrained_model_name_or_path:
+  kwargs:
+    model_max_length: 2048
+
+model:
+  name: open_lm
+  # pretrained_model_name_or_path: [add name from memory]
+  init_device: cpu
+  pretrained: true
+
+load_path: # Add your (optional) Composer checkpoint path here!
+
+device_eval_batch_size: 8
+
+# FSDP config for model sharding
+fsdp_config:
+  sharding_strategy: FULL_SHARD
+  mixed_precision: FULL
+
+
+icl_tasks:
+- label: numpy_201706
+  dataset_uri: local_data/code_eval/numpy/201706.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: numpy_201801
+  dataset_uri: local_data/code_eval/numpy/201801.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: numpy_201807
+  dataset_uri: local_data/code_eval/numpy/201807.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: numpy_201901
+  dataset_uri: local_data/code_eval/numpy/201901.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: numpy_201907
+  dataset_uri: local_data/code_eval/numpy/201907.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: numpy_201912
+  dataset_uri: local_data/code_eval/numpy/201912.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: numpy_202006
+  dataset_uri: local_data/code_eval/numpy/202006.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: numpy_202101
+  dataset_uri: local_data/code_eval/numpy/202101.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: numpy_202106
+  dataset_uri: local_data/code_eval/numpy/202106.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: numpy_202112
+  dataset_uri: local_data/code_eval/numpy/202112.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: numpy_202206
+  dataset_uri: local_data/code_eval/numpy/202206.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: numpy_202212
+  dataset_uri: local_data/code_eval/numpy/202212.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: numpy_202306
+  dataset_uri: local_data/code_eval/numpy/202306.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: numpy_202309
+  dataset_uri: local_data/code_eval/numpy/202309.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: numpy_202406
+  dataset_uri: local_data/code_eval/numpy/202406.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: numpy_202408
+  dataset_uri: local_data/code_eval/numpy/202408.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+
+- label: pytorch_202103
+  dataset_uri: local_data/code_eval/pytorch/202103.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: pytorch_202106
+  dataset_uri: local_data/code_eval/pytorch/202106.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: pytorch_202110
+  dataset_uri: local_data/code_eval/pytorch/202110.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: pytorch_202203
+  dataset_uri: local_data/code_eval/pytorch/202203.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: pytorch_202206
+  dataset_uri: local_data/code_eval/pytorch/202206.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: pytorch_202210
+  dataset_uri: local_data/code_eval/pytorch/202210.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: pytorch_202303
+  dataset_uri: local_data/code_eval/pytorch/202303.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: pytorch_202310
+  dataset_uri: local_data/code_eval/pytorch/202310.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: pytorch_202401
+  dataset_uri: local_data/code_eval/pytorch/202401.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: pytorch_202404
+  dataset_uri: local_data/code_eval/pytorch/202404.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false
+- label: pytorch_202407
+  dataset_uri: local_data/code_eval/pytorch/202407.jsonl
+  num_fewshot:
+  - 0
+  icl_task_type: language_modeling
+  metric_names:
+  - PerplexityIgnoringPad
+  has_categories: false

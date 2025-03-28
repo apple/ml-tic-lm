@@ -1,0 +1,289 @@
+epoch: 1.25T
+dataset: bigdata
+num_params: 1B
+max_seq_len: 512
+seed: 1
+precision: fp32
+apply_sampling: true
+sampling_seed: 42
+
+# Tokenizer
+tokenizer:
+  # name: [Add name from memory]
+  pretrained_model_name_or_path:
+  kwargs:
+    model_max_length: 2048
+
+model:
+  name: open_lm
+  # pretrained_model_name_or_path: [add name from memory]
+  init_device: cpu
+  pretrained: true
+
+load_path: # Add your (optional) Composer checkpoint path here!
+
+device_eval_batch_size: 8
+
+# FSDP config for model sharding
+fsdp_config:
+  sharding_strategy: FULL_SHARD
+  mixed_precision: FULL
+
+
+icl_tasks:
+- dataset_uri: local_data/twiki_changed_textbased/wiki_diff_20150112_20141208.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_diff_20150112_20141208
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_changed_textbased/wiki_diff_20150805_20150602.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_diff_20150805_20150602
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_changed_textbased/wiki_diff_20160204_20160113.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_diff_20160204_20160113
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_changed_textbased/wiki_diff_20160801_20160701.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_diff_20160801_20160701
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_changed_textbased/wiki_diff_20170101_20161201.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_diff_20170101_20161201
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_changed_textbased/wiki_diff_20170701_20170601.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_diff_20170701_20170601
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_changed_textbased/wiki_diff_20180101_20171201.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_diff_20180101_20171201
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_changed_textbased/wiki_diff_20180901_20180320.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_diff_20180901_20180320
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_changed_textbased/wiki_diff_20190120_20181201.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_diff_20190120_20181201
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_changed_textbased/wiki_diff_20200101_20190201.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_diff_20200101_20190201
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_changed_textbased/wiki_diff_20200920_20200101.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_diff_20200920_20200101
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_changed_textbased/wiki_diff_20201220_20201120.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_diff_20201220_20201120
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_changed_textbased/wiki_diff_20210701_20210620.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_diff_20210701_20210620
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_changed_textbased/wiki_diff_20220101_20211201.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_diff_20220101_20211201
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_changed_textbased/wiki_diff_20220501_20220420.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_diff_20220501_20220420
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_changed_textbased/wiki_diff_20240401_20220501.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_diff_20240401_20220501
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_unchanged_textbased/wiki_unchanged_20150112_20141208.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_unchanged_20150112_20141208
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_unchanged_textbased/wiki_unchanged_20150805_20150602.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_unchanged_20150805_20150602
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_unchanged_textbased/wiki_unchanged_20160204_20160113.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_unchanged_20160204_20160113
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_unchanged_textbased/wiki_unchanged_20160801_20160701.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_unchanged_20160801_20160701
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_unchanged_textbased/wiki_unchanged_20170101_20161201.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_unchanged_20170101_20161201
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_unchanged_textbased/wiki_unchanged_20170701_20170601.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_unchanged_20170701_20170601
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_unchanged_textbased/wiki_unchanged_20180101_20171201.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_unchanged_20180101_20171201
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_unchanged_textbased/wiki_unchanged_20180901_20180320.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_unchanged_20180901_20180320
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_unchanged_textbased/wiki_unchanged_20190120_20181201.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_unchanged_20190120_20181201
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_unchanged_textbased/wiki_unchanged_20200101_20190201.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_unchanged_20200101_20190201
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_unchanged_textbased/wiki_unchanged_20200920_20200101.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_unchanged_20200920_20200101
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_unchanged_textbased/wiki_unchanged_20201220_20201120.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_unchanged_20201220_20201120
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_unchanged_textbased/wiki_unchanged_20210701_20210620.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_unchanged_20210701_20210620
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_unchanged_textbased/wiki_unchanged_20220101_20211201.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_unchanged_20220101_20211201
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_unchanged_textbased/wiki_unchanged_20220501_20220420.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_unchanged_20220501_20220420
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0
+- dataset_uri: local_data/twiki_unchanged_textbased/wiki_unchanged_20240401_20220501.jsonl
+  has_categories: false
+  icl_task_type: language_modeling
+  label: wiki_unchanged_20240401_20220501
+  metric_names:
+  - LanguageNounPerplexity
+  num_fewshot:
+  - 0

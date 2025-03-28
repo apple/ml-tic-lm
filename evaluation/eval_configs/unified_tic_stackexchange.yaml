@@ -1,0 +1,18 @@
+perplexity_evals:
+  num_gpus: 8
+  distributed: true
+  eval_sets: null
+  per_gpu_val_batch_size: 8
+  workers: 1
+  torchcompile: true
+  delete_previous_checkpoint: true
+  val_iter_ci: 10000
+  val_max_pop_ci: 300000
+
+downstream_evals:
+  num_gpus: 8
+  eval_yaml: "eval_configs/downstream_evals/tic_stackexchange.yaml"
+  averager_name: null
+  hf_cache_dir: null
+  model: null
+  force_xformers: false

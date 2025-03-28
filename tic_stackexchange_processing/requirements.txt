@@ -1,0 +1,14 @@
+# StackExchange Processing requirements
+argparse
+boto3
+fcntl
+ftfy
+joblib
+numpy
+pandas
+psutil
+pyunpack
+ray
+tqdm
+transformers>=4.0.0
+pyyaml

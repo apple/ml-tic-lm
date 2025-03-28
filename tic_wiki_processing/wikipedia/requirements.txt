@@ -1,0 +1,12 @@
+smart-open
+datasets==2.5.2
+nltk
+qwikidata
+wikidata
+bs4
+wikiextractor
+gensim
+ray
+transformers
+beautifulsoup4
+pandas

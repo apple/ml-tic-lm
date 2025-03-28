@@ -1,0 +1,445 @@
+diff --git a/baselines/baselines_configs/domain_extraction_news.yaml b/baselines/baselines_configs/domain_extraction_news.yaml
+new file mode 100644
+index 0000000..d86029a
+--- /dev/null
++++ b/baselines/baselines_configs/domain_extraction_news.yaml
+@@ -0,0 +1,59 @@
++- source: cc
++  weight: 1.0
++  steps:
++    - func: url_substring_filter
++      banlist: [
++        "abcnews.go.com",
++        "bbc.com", "bbc.co.uk", "news.bbc.co.uk",
++        "cbsnews.com",
++        "cnn.com", "edition.cnn.com",
++        "dailymail.co.uk",
++        "ft.com",
++        "foxnews.com", "latino.foxnews.com",
++        "theglobeandmail.com",
++        "latimes.com", "articles.latimes.com",
++        "nytimes.com",
++        "newyorker.com",
++        "news.com.au",
++        "reuters.com", "ca.reuters.com", "uk.reuters.com", "in.reuters.com", "cn.reuters.com", "af.reuters.com", "lta.reuters.com", "commerce.us.reuters.com",
++        "scotsman.com",
++        "smh.com.au",
++        "telegraph.co.uk",
++        "upi.com",
++        "news.stv.tv",
++        "euronews.com",
++        "thenationonlineng.net",
++        "washingtonpost.com",
++        "brisbanetimes.com.au",
++        "theguardian.com",
++        "independent.co.uk",
++        "time.com", "content.time.com", "newsfeed.time.com", "techland.time.com", "business.time.com", "entertainment.time.com", "world.time.com", "nation.time.com",
++        "newsweek.com",
++        "allafrica.com",
++        "msnbc.com",
++        "huffpost.com",
++        "standard.co.uk",
++        "metro.co.uk",
++        "ndtv.com",
++        "rte.ie",
++        "seattletimes.com",
++        "thelocal.com",
++        "voazimbabwe.com",
++        "aljazeera.com",
++        "egyptindependent.com",
++        "voanews.com",
++        "chicagodefender.com",
++        "heraldscotland.com",
++        "oneindia.com",
++        "news.sky.com",
++        "newrepublic.com",
++        "wsj.com", "online.wsj.com",
++        "chicagotribune.com", "articles.chicagotribune.com",
++        "bostonglobe.com",
++        "timesofindia.indiatimes.com",
++        "apnews.com",
++        "startribune.com",
++      ]
++      exact_domain_match: True
++      ignore_chars: ['www.']
++      invert: True
+\ No newline at end of file
+diff --git a/baselines/baselines_configs/domain_extraction_wiki.yaml b/baselines/baselines_configs/domain_extraction_wiki.yaml
+new file mode 100644
+index 0000000..37e5fc4
+--- /dev/null
++++ b/baselines/baselines_configs/domain_extraction_wiki.yaml
+@@ -0,0 +1,8 @@
++- source: cc
++  weight: 1.0
++  steps:
++    - func: url_substring_filter
++      banlist: ["en.wikipedia.org", "simple.wikipedia.org", "en.m.wikipedia.org", "simple.m.wikipedia.org"]
++      exact_domain_match: True
++      ignore_chars: ['www.']
++      invert: True
+\ No newline at end of file
+diff --git a/baselines/baselines_configs/refinedweb_ids_and_modifiers.yaml b/baselines/baselines_configs/refinedweb_ids_and_modifiers.yaml
+new file mode 100644
+index 0000000..47792a8
+--- /dev/null
++++ b/baselines/baselines_configs/refinedweb_ids_and_modifiers.yaml
+@@ -0,0 +1,37 @@
++- source: cc
++  weight: 1.0
++  steps:
++    - func: warc_metadata_filter_parallel_dir
++      ids_dir: /absolute/path/to/absolute/path/to/your/ids/copy/    # Change to where your ids are stored (can be s3 path)
++      metadata_keys: ["WARC-Record-ID", "WARC-Date"]
++      ignore_chars: ["<urn:uuid:", ">"]
++    - func: url_removal_modifier
++    - func: newline_removal_modifier
++      max_consecutive: 2
++    - func: word_counter_enricher
++      key: previous_word_count
++    - func: uppercase_ratio_line_modifier
++      max_ratio: 0.5
++    - func: numeric_ratio_line_modifier
++      max_ratio: 0.999999
++    - func: counter_line_modifier
++    - func: line_length_modifier
++      min_length: 2
++    - func: substring_line_modifier
++      max_length: 10
++      banlist: "items in cart"
++      remove_substring_only: True
++    - func: substring_line_modifier
++      max_length: 10
++      banlist: "Read more..."
++      location: suffix
++      remove_substring_only: True
++    - func: substring_line_modifier
++      max_length: 10
++      banlist: "Sign-in"
++      location: prefix
++      remove_substring_only: True
++    - func: word_removal_ratio_filter
++      prev_word_count_key: previous_word_count
++      max_removed_ratio: 0.05
++    # TODO: Deduplication
+\ No newline at end of file
+diff --git a/baselines/core/constants.py b/baselines/core/constants.py
+index cdfca54..d62783a 100644
+--- a/baselines/core/constants.py
++++ b/baselines/core/constants.py
+@@ -2,6 +2,8 @@
+ CONTENT = "text"
+ URL = "url"
+ CHUNK = "chunk"
++WARC_METADATA="metadata"
++INPUT_PATH="input_path"
+ 
+ # Stats file keys
+ PROCESS_SETUP_KEY_NAME = 'process_setup'
+@@ -10,4 +12,4 @@ COMMIT_KEY_NAME = 'commit'
+ 
+ GLOBAL_FUNCTIONS = {
+ 	'exact_dedup': None,
+-} 
+\ No newline at end of file
++}
+\ No newline at end of file
+diff --git a/baselines/core/processor.py b/baselines/core/processor.py
+index 9169695..a2f79ee 100644
+--- a/baselines/core/processor.py
++++ b/baselines/core/processor.py
+@@ -10,7 +10,7 @@ from yaml import safe_load
+ 
+ from baselines.core.factories import get_mapper, get_aggregator, get_transform
+ from baselines.core.file_utils import read_jsonl, write_jsonl, makedirs_if_missing, delete_file, is_exists
+-from baselines.core.constants import PROCESS_SETUP_KEY_NAME, PROCESS_END_KEY_NAME, COMMIT_KEY_NAME, GLOBAL_FUNCTIONS
++from baselines.core.constants import PROCESS_SETUP_KEY_NAME, PROCESS_END_KEY_NAME, COMMIT_KEY_NAME, GLOBAL_FUNCTIONS, INPUT_PATH
+ 
+ logger = logging.getLogger(__name__)
+ 
+@@ -40,7 +40,9 @@ SPLIT_INDEX = 2
+ def commit(pages, stats, output_path, stats_output_path):
+     logger.info(f"committing pages to {output_path} (and stats to {stats_output_path})")
+     t = time.time()
+-    write_jsonl(pages, output_path)
++
++    if len(pages) > 0:
++        write_jsonl(pages, output_path)
+ 
+     stats.append({'name': COMMIT_KEY_NAME, 'secs': time.time() - t})
+     write_jsonl(stats, stats_output_path, 'a')
+@@ -69,7 +71,7 @@ def _is_step_stats(line):
+     return line['name'] not in {PROCESS_SETUP_KEY_NAME, PROCESS_END_KEY_NAME, COMMIT_KEY_NAME}
+ 
+ 
+-def process_single_file(config_data: Dict[str, Any], raw_data_dirpath: str, jsonl_relpath: str, source_name: str, 
++def process_single_file(config_data: Dict[str, Any], raw_data_dirpath: str, jsonl_relpath: str, source_name: str,
+                         base_output_path: str, workers: int = 1, overwrite: bool = False) -> Tuple[str, str]:
+     """
+     :param config_data: A processed config (from yaml) that specifies the steps to be taken
+@@ -95,12 +97,17 @@ def process_single_file(config_data: Dict[str, Any], raw_data_dirpath: str, json
+     t1 = time.time()
+     input_path = os.path.join(raw_data_dirpath, jsonl_relpath)
+     pages = list(read_jsonl(input_path))
++
++    # Add the input path to each page
++    for p in pages:
++        p[INPUT_PATH] = jsonl_relpath
++
+     jsonl_load_secs = time.time() - t1
+ 
+     # Assumption #3 - for each input shard, there is a specific stats file that accompanies it
+     output_path, stats_output_path = _get_output_paths(base_output_path, jsonl_relpath)
+ 
+-    # If a jsonl is empty (e.g., due to another chunk), the page will be skipped  
++    # If a jsonl is empty (e.g., due to another chunk), the page will be skipped
+     num_pages_in = len(pages)
+     if num_pages_in == 0:
+         logger.info(f"Input data file at {input_path} is empty.")
+@@ -164,7 +171,7 @@ def process_single_file(config_data: Dict[str, Any], raw_data_dirpath: str, json
+             continue
+         elif step['func'] in GLOBAL_FUNCTIONS:
+             # Assumption: GLOBAL functions will do their own logging to the respective stats files, thus can always
+-            # just exit if we reach this elif condition, since completed GLOBAL fucntions will only reach previous if block. 
++            # just exit if we reach this elif condition, since completed GLOBAL fucntions will only reach previous if block.
+             early_exit = True
+             break
+ 
+diff --git a/baselines/mappers/filters/metadata_filters.py b/baselines/mappers/filters/metadata_filters.py
+index 287d446..c39c5a4 100644
+--- a/baselines/mappers/filters/metadata_filters.py
++++ b/baselines/mappers/filters/metadata_filters.py
+@@ -8,10 +8,12 @@ import random
+ from core.factory_utils import factory_function
+ from baselines.core.constants import *
+ 
++import os
++from smart_open import open
+ 
+ def random_sampling_filter(page, keep_probability=0.1):
+     """
+-    Filter the JSON objects randomly based on a random coinflip, in order to subsample according to a specified probability. 
++    Filter the JSON objects randomly based on a random coinflip, in order to subsample according to a specified probability.
+ 
+     Arguments:
+     page -- A dictionary representation of the page.
+@@ -21,7 +23,7 @@ def random_sampling_filter(page, keep_probability=0.1):
+     """
+     assert 0 <= keep_probability <= 1
+     return [page] if random.random() < keep_probability else []
+-    
++
+ 
+ def language_filter(page: Dict, keep_languages: List[str], key='language_id_whole_page_langdetect', threshold=0.0) -> \
+         List[Dict]:
+@@ -51,12 +53,12 @@ def language_filter(page: Dict, keep_languages: List[str], key='language_id_whol
+ 
+ def quality_filter(page: Dict, key: str = 'fasttext_hq_prob', threshold: float=0.0, lower_better: bool=False, key_must_exist: bool=True) -> List[Dict]:
+     """
+-    Filters the JSON objects based on a quality score (e.g. from a model-based prediction). 
++    Filters the JSON objects based on a quality score (e.g. from a model-based prediction).
+ 
+-    Arguments: 
+-    page -- A dictionary representation of the page. 
++    Arguments:
++    page -- A dictionary representation of the page.
+     key -- A string specifying which quality score, the default is the default key produced by the fasttext hq_prob model
+-    threshold -- A float indicating the minimum quality required to keep the page. 
++    threshold -- A float indicating the minimum quality required to keep the page.
+     lower_better - A bool for whether lower quality score is better (e.g., for perplexity, lower_better should be True).
+     key_must_exist - A bool for whether the key must exist for all pages. If False, will filter out pages that are missing the key
+     Returns:
+@@ -73,74 +75,112 @@ def quality_filter(page: Dict, key: str = 'fasttext_hq_prob', threshold: float=0
+     if lower_better:
+         return [page] if quality_score <= threshold else []
+     else:
+-        return [page] if quality_score >= threshold else [] 
++        return [page] if quality_score >= threshold else []
+ 
+ 
+ @factory_function
+-def url_substring_filter(banlist: Union[str, List] = None, banlist_from_fname: str = None, ignore_chars: List[str] = None, 
++def url_substring_filter(banlist: Union[str, List] = None, banlist_from_fname: str = None, ignore_chars: List[str] = None, invert: bool = False,
+                          num_banned_substrs: int = 1, exact_domain_match: bool=False, match_substrings=True, case_sensitive=False) -> List[Dict]:
+     """
+     Filters the input JSON object by URL
+-
+     Arguments:
+     page -- A dictionary representing a JSON object. It should have a 'url' field
+             that contains the urls for the pages to be analyzed
+     banlist -- A list of banned substrs to look for within a url.
+     banlist_from_fname -- Gives the option to load in a large banlist from a .txt file where each substring
+                           is on a spearate line. It can also take in a .pkl file containing a pre-compiled regex
+-                          This takes precedence over passing in via banlist 
++                          This takes precedence over passing in via banlist
+     ignore_chars -- A list of characters to ignore (e.g., ['.', "-"]) as they are typically used to bypass
+             detectors for fradulent/inappropriate webpages
++    invert -- Whether to invert the filter (i.e., keep only the pages that contain the substrings)
+     num_banned_substrs -- Number of num_banned_substrs within the banlist that must be present
+             to be filtered out. Refinedweb uses this for "softer" banlist items (e.g., "webcam", "escort")
+     exact_domain_match -- Whether to extract the domain from the page url and check for an exact match (e.g., when
+     set to False, "le.com" being in banlist would lead to "google.com" being banned)
+-    match_substrings -- When True, the banlist items only need to be a substring. When False, items must exist 
+-            in between word boundaries. Note this is only used when exact_domain_match is False. 
++    match_substrings -- When True, the banlist items only need to be a substring. When False, items must exist
++            in between word boundaries. Note this is only used when exact_domain_match is False.
+     case_sensitive -- Whether to check for case sensitivity (RefinedWeb sets this to be True)
+-
+     Returns:
+     A list containing the input JSON object if it passes the filter,
+     or an empty list if it doesn't.
+     """
+-
+     # TODO: Right now initialization/compilation for exact_domain_match=False + large banlists (3 mins)
+-    # Should verify whether we can use exact_domain_match=True 
+-
++    # Should verify whether we can use exact_domain_match=True
+     if banlist_from_fname is not None and any(banlist_from_fname.endswith(e) for e in ['.pkl', '.pickle']):
+         assert not exact_domain_match, "pickled banlist cannot be used with exact_domain_match"
+         with open(banlist_from_fname, "rb") as file:
+             pattern = pickle.load(file)
+     else:
+-        if banlist_from_fname is not None:        
++        if banlist_from_fname is not None:
+             with open(banlist_from_fname, "r") as file:
+                     banlist = file.read().splitlines()
+         elif isinstance(banlist, str):
+             banlist = [banlist]
+-
+         banlist = [b.lower() for b in banlist] if not case_sensitive else [b for b in banlist]
+-        if exact_domain_match: 
++        if exact_domain_match:
+             banlist = set(banlist)
+         else:
+             re_flags = re.IGNORECASE if not case_sensitive else None
+             pattern = re.compile(Blacklist(banlist, match_substrings=match_substrings, re_flags=re_flags).compiled)
+-
+     ignore_chars = [] if ignore_chars is None else ignore_chars
+-
+     def filter_fn(page: Dict):
+         url = urlparse(page[URL]).netloc if exact_domain_match else page[URL]
+         url = url.lower() if not case_sensitive else url
+-
+         for char in ignore_chars:
+             url = url.replace(char, "")
+-            
++
+         if exact_domain_match and url in banlist:
+-           return []
++           return [] if not invert else [page]
+         elif not exact_domain_match:
+            banned_subtrs = len(set(pattern.findall(url)))
+            if banned_subtrs >= num_banned_substrs:
+-                return []
+-        
+-        return [page]
++                return [] if not invert else [page]
++
++        return [page] if not invert else []
++
++    return filter_fn
++
++@factory_function
++def warc_metadata_filter_parallel_dir(ids_dir, metadata_keys=None, inverse=False, ignore_chars=None):
++    """
++    Filters based upon a list of accepted WARC metadata keys with exact string match.
++    If multiple keys are provided, they are concatenated without a space.
++    Arguments:
++    page -- A dictionary representation of the page.
++    ids_dir -- A local or s3 folder containing a set of .txt files with WARC metadata strings to keep, the names are
++    assumed to be the same as the file names in the input directory except with a .txt extension.
++    metadata_keys -- What metadata keys are used for filtering. If None, defaults to using just WARC-Record-ID
++    inverse -- If True, the filter will keep pages that do not match the ids_from_file
++    ignore_chars -- A list of characters to ignore (e.g., ['<', ">"]) if present in all metadata strings.
++    Returns:
++    A list containing the page if the language is in the keep_languages list and exceeds the threshold, otherwise an empty list.
++    """
++    current_file = None
++    metadata_strs = None
++    if metadata_keys is None:
++        metadata_keys = ['WARC-Record-ID']
++
++    def filter_fn(page: Dict):
++        nonlocal current_file
++        nonlocal metadata_strs
++
++        # If we have a different input path, we need to load a different set of metadata strings
++        if page[INPUT_PATH] != current_file:
++            current_file = page[INPUT_PATH]
++            ids_path = os.path.join(ids_dir, re.sub(r"\.jsonl.*", ".txt", os.path.basename(current_file)))
++            with open(ids_path, 'r') as f:
++                metadata_strs = set(f.read().splitlines())
++
++        metadata = page[WARC_METADATA]
++        metadata = ''.join([metadata.get(key, '') for key in metadata_keys])
++
++        if ignore_chars is not None:
++            for substr in ignore_chars:
++                metadata = metadata.replace(substr, "")
++
++        if metadata in metadata_strs:
++            return [page] if not inverse else []
++        else:
++            return [] if not inverse else [page]
+ 
+     return filter_fn
+\ No newline at end of file
+diff --git a/ray_processing/process.py b/ray_processing/process.py
+index 58cd867..7293934 100644
+--- a/ray_processing/process.py
++++ b/ray_processing/process.py
+@@ -35,7 +35,7 @@ def parse_args():
+     )
+     parser.add_argument("--shard_list_file", type=str, default=None, help="Path to a file containing a list of input shards.")
+     parser.add_argument(
+-        "--shard_list_filters", type=str, nargs='+', help="List of substrings to filter the input shard list by."
++        "--shard_list_filters", type=str, nargs='+', help="List of substrings to filter the input shard list by.", default=None
+     )
+ 
+     parser.add_argument("--output_dir", required=True, help="Path to the output dir of the processed file.")
+@@ -106,8 +106,8 @@ def list_shard_files(data_dirpath, num_shards=None, shard_list_file=None, shard_
+         bucket_name, path_within_bucket = data_dirpath.replace("s3://","").split("/", 1)
+         path_within_bucket = path_within_bucket if path_within_bucket.endswith("/") else f'{path_within_bucket}/'
+         bucket = s3.Bucket(bucket_name)
+-        shard_files = [x.key.replace(path_within_bucket, "") 
+-                       for x in bucket.objects.filter(Prefix=path_within_bucket) 
++        shard_files = [x.key.replace(path_within_bucket, "")
++                       for x in bucket.objects.filter(Prefix=path_within_bucket)
+                        if all(s not in x.key for s in ['/stats/', 'global_stats.jsonl'])]
+ 
+     if num_shards is not None:
+@@ -206,7 +206,7 @@ if __name__ == "__main__":
+                 working_dir = global_stats[i - 1]["working_dir"] if i > 0 else working_dir
+ 
+         # Retrieve the list of files before processing a chunk (in case of deletions)
+-        shard_files = list_shard_files(working_dir, args.num_shards, args.shard_list_file)
++        shard_files = list_shard_files(working_dir, args.num_shards, args.shard_list_file, args.shard_list_filters)
+         shard_extension = os.path.splitext(shard_files[0])[-1][1:]
+         print(f"Starting chunk {i} with name {step_name}, # of input jsonls = {len(shard_files)}")
+
+diff --git a/baselines/mappers/modifiers.py b/baselines/mappers/modifiers.py
+index 827da17..43905e9 100644
+--- a/baselines/mappers/modifiers.py
++++ b/baselines/mappers/modifiers.py
+@@ -12,7 +12,8 @@ from core.factory_utils import factory_function
+ from bs4 import BeautifulSoup
+ import random
+ import copy
+-
++from pathlib import Path
++import os
+
+ def starcoder_v2_repo_splitter(page: Dict, max_files=1000, delete_content=True):
+     """
+@@ -673,6 +674,11 @@ def url_removal_modifier(tlds_filepath="baselines/mappers/iana_tlds.txt"):
+     Returns:
+     A list containing the input JSON object with urls in the text removec
+     """
++    if not os.path.exists(tlds_filepath):
++        print("TRY TO FIND ABSOLUTE PATH")
++        current_file = Path(__file__).absolute()
++        tlds_filepath = (current_file.parent / "iana_tlds.txt").as_posix()
++
+     with open(tlds_filepath, "r") as file:
+         tlds_list = [re.escape(tld) for tld in file.read().splitlines()]
+ 

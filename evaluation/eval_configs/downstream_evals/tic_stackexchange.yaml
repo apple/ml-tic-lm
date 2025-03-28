@@ -1,0 +1,2122 @@
+epoch: 1.25T
+dataset: bigdata
+num_params: 1B
+max_seq_len: 2048
+seed: 1
+precision: fp32
+
+# Tokenizer
+tokenizer:
+  # name: [Add name from memory]
+  pretrained_model_name_or_path:
+  kwargs:
+    model_max_length: 2048
+
+model:
+  name: open_lm
+  # pretrained_model_name_or_path: [add name from memory]
+  init_device: cpu
+  pretrained: true
+
+load_path: # Add your (optional) Composer checkpoint path here!
+
+device_eval_batch_size: 8
+
+# FSDP config for model sharding
+fsdp_config:
+  sharding_strategy: FULL_SHARD
+  mixed_precision: FULL
+
+
+icl_tasks:
+
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20130501-20130531.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20130501_20130531
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20131001-20131031.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20131001_20131031
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20140301-20140331.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20140301_20140331
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20140801-20140831.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20140801_20140831
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20150101-20150131.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20150101_20150131
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20150801-20150831.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20150801_20150831
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20160201-20160229.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20160201_20160229
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20160801-20160831.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20160801_20160831
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20170101-20170131.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20170101_20170131
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20170701-20170731.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20170701_20170731
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20180101-20180131.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20180101_20180131
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20180701-20180731.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20180701_20180731
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20190101-20190131.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20190101_20190131
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20190701-20190731.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20190701_20190731
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20200101-20200131.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20200101_20200131
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20200701-20200731.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20200701_20200731
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20210101-20210131.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20210101_20210131
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20210701-20210731.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20210701_20210731
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20220101-20220131.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20220101_20220131
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20220801-20220930.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20220801_20220930
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20221201-20230131.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20221201_20230131
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange/stackoverflow/20230501-20230831.jsonl
+  icl_task_type: multiple_choice
+  label: stackoverflow_20230501_20230831
+  metric_names:
+  - InContextLearningMultipleChoiceAccuracy
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/apple/20121201-20130831.jsonl
+  icl_task_type: multiple_choice
+  label: apple_20121201_20130831_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/apple/20130901-20140531.jsonl
+  icl_task_type: multiple_choice
+  label: apple_20130901_20140531_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/apple/20140601-20150331.jsonl
+  icl_task_type: multiple_choice
+  label: apple_20140601_20150331_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/apple/20150401-20151231.jsonl
+  icl_task_type: multiple_choice
+  label: apple_20150401_20151231_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/apple/20160101-20161231.jsonl
+  icl_task_type: multiple_choice
+  label: apple_20160101_20161231_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/apple/20170101-20180331.jsonl
+  icl_task_type: multiple_choice
+  label: apple_20170101_20180331_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/apple/20180401-20190930.jsonl
+  icl_task_type: multiple_choice
+  label: apple_20180401_20190930_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/apple/20191001-20210630.jsonl
+  icl_task_type: multiple_choice
+  label: apple_20191001_20210630_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/apple/20210701-20240229.jsonl
+  icl_task_type: multiple_choice
+  label: apple_20210701_20240229_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/codereview/20121201-20140331.jsonl
+  icl_task_type: multiple_choice
+  label: codereview_20121201_20140331_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/codereview/20140401-20141130.jsonl
+  icl_task_type: multiple_choice
+  label: codereview_20140401_20141130_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/codereview/20141201-20150831.jsonl
+  icl_task_type: multiple_choice
+  label: codereview_20141201_20150831_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/codereview/20150901-20160731.jsonl
+  icl_task_type: multiple_choice
+  label: codereview_20150901_20160731_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/codereview/20160801-20170930.jsonl
+  icl_task_type: multiple_choice
+  label: codereview_20160801_20170930_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/codereview/20171001-20190630.jsonl
+  icl_task_type: multiple_choice
+  label: codereview_20171001_20190630_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/codereview/20190701-20240331.jsonl
+  icl_task_type: multiple_choice
+  label: codereview_20190701_20240331_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/electronics/20130301-20130630.jsonl
+  icl_task_type: multiple_choice
+  label: electronics_20130301_20130630_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/electronics/20131201-20140430.jsonl
+  icl_task_type: multiple_choice
+  label: electronics_20131201_20140430_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/electronics/20140501-20140930.jsonl
+  icl_task_type: multiple_choice
+  label: electronics_20140501_20140930_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/electronics/20141001-20150131.jsonl
+  icl_task_type: multiple_choice
+  label: electronics_20141001_20150131_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/electronics/20150201-20150531.jsonl
+  icl_task_type: multiple_choice
+  label: electronics_20150201_20150531_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/electronics/20150601-20150930.jsonl
+  icl_task_type: multiple_choice
+  label: electronics_20150601_20150930_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/electronics/20160201-20160531.jsonl
+  icl_task_type: multiple_choice
+  label: electronics_20160201_20160531_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/electronics/20160601-20160930.jsonl
+  icl_task_type: multiple_choice
+  label: electronics_20160601_20160930_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/electronics/20170201-20170531.jsonl
+  icl_task_type: multiple_choice
+  label: electronics_20170201_20170531_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/electronics/20170601-20170930.jsonl
+  icl_task_type: multiple_choice
+  label: electronics_20170601_20170930_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/electronics/20180301-20180731.jsonl
+  icl_task_type: multiple_choice
+  label: electronics_20180301_20180731_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/electronics/20180801-20181231.jsonl
+  icl_task_type: multiple_choice
+  label: electronics_20180801_20181231_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/electronics/20190101-20190531.jsonl
+  icl_task_type: multiple_choice
+  label: electronics_20190101_20190531_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/electronics/20190601-20191031.jsonl
+  icl_task_type: multiple_choice
+  label: electronics_20190601_20191031_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/electronics/20191101-20200430.jsonl
+  icl_task_type: multiple_choice
+  label: electronics_20191101_20200430_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/electronics/20200501-20200930.jsonl
+  icl_task_type: multiple_choice
+  label: electronics_20200501_20200930_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/electronics/20210401-20210930.jsonl
+  icl_task_type: multiple_choice
+  label: electronics_20210401_20210930_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/electronics/20211001-20220430.jsonl
+  icl_task_type: multiple_choice
+  label: electronics_20211001_20220430_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/electronics/20220501-20221130.jsonl
+  icl_task_type: multiple_choice
+  label: electronics_20220501_20221130_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/electronics/20221201-20230731.jsonl
+  icl_task_type: multiple_choice
+  label: electronics_20221201_20230731_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/electronics/20230801-20240331.jsonl
+  icl_task_type: multiple_choice
+  label: electronics_20230801_20240331_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/english/20130601-20131031.jsonl
+  icl_task_type: multiple_choice
+  label: english_20130601_20131031_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/english/20131101-20140228.jsonl
+  icl_task_type: multiple_choice
+  label: english_20131101_20140228_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/english/20140301-20140531.jsonl
+  icl_task_type: multiple_choice
+  label: english_20140301_20140531_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/english/20140601-20140930.jsonl
+  icl_task_type: multiple_choice
+  label: english_20140601_20140930_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/english/20150101-20150430.jsonl
+  icl_task_type: multiple_choice
+  label: english_20150101_20150430_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/english/20150801-20151130.jsonl
+  icl_task_type: multiple_choice
+  label: english_20150801_20151130_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/english/20160401-20160831.jsonl
+  icl_task_type: multiple_choice
+  label: english_20160401_20160831_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/english/20160901-20170228.jsonl
+  icl_task_type: multiple_choice
+  label: english_20160901_20170228_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/english/20170301-20170930.jsonl
+  icl_task_type: multiple_choice
+  label: english_20170301_20170930_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/english/20171001-20180531.jsonl
+  icl_task_type: multiple_choice
+  label: english_20171001_20180531_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/english/20180601-20190131.jsonl
+  icl_task_type: multiple_choice
+  label: english_20180601_20190131_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/english/20190201-20191231.jsonl
+  icl_task_type: multiple_choice
+  label: english_20190201_20191231_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/english/20200101-20210331.jsonl
+  icl_task_type: multiple_choice
+  label: english_20200101_20210331_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/english/20210401-20230331.jsonl
+  icl_task_type: multiple_choice
+  label: english_20210401_20230331_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/gaming/20130701-20131231.jsonl
+  icl_task_type: multiple_choice
+  label: gaming_20130701_20131231_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/gaming/20140101-20140630.jsonl
+  icl_task_type: multiple_choice
+  label: gaming_20140101_20140630_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/gaming/20140701-20150131.jsonl
+  icl_task_type: multiple_choice
+  label: gaming_20140701_20150131_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/gaming/20150201-20150831.jsonl
+  icl_task_type: multiple_choice
+  label: gaming_20150201_20150831_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/gaming/20150901-20160430.jsonl
+  icl_task_type: multiple_choice
+  label: gaming_20150901_20160430_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/gaming/20160501-20161231.jsonl
+  icl_task_type: multiple_choice
+  label: gaming_20160501_20161231_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/gaming/20170101-20180228.jsonl
+  icl_task_type: multiple_choice
+  label: gaming_20170101_20180228_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/gaming/20180301-20200731.jsonl
+  icl_task_type: multiple_choice
+  label: gaming_20180301_20200731_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/gaming/20200801-20240331.jsonl
+  icl_task_type: multiple_choice
+  label: gaming_20200801_20240331_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20130501-20130531.jsonl
+  icl_task_type: multiple_choice
+  label: math_20130501_20130531_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20131001-20131031.jsonl
+  icl_task_type: multiple_choice
+  label: math_20131001_20131031_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20140301-20140331.jsonl
+  icl_task_type: multiple_choice
+  label: math_20140301_20140331_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20140801-20140831.jsonl
+  icl_task_type: multiple_choice
+  label: math_20140801_20140831_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20150101-20150131.jsonl
+  icl_task_type: multiple_choice
+  label: math_20150101_20150131_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20150801-20150831.jsonl
+  icl_task_type: multiple_choice
+  label: math_20150801_20150831_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20160201-20160229.jsonl
+  icl_task_type: multiple_choice
+  label: math_20160201_20160229_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20160801-20160831.jsonl
+  icl_task_type: multiple_choice
+  label: math_20160801_20160831_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20170101-20170131.jsonl
+  icl_task_type: multiple_choice
+  label: math_20170101_20170131_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20170701-20170731.jsonl
+  icl_task_type: multiple_choice
+  label: math_20170701_20170731_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20180101-20180131.jsonl
+  icl_task_type: multiple_choice
+  label: math_20180101_20180131_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20180701-20180731.jsonl
+  icl_task_type: multiple_choice
+  label: math_20180701_20180731_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20190101-20190131.jsonl
+  icl_task_type: multiple_choice
+  label: math_20190101_20190131_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20190701-20190731.jsonl
+  icl_task_type: multiple_choice
+  label: math_20190701_20190731_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20200101-20200131.jsonl
+  icl_task_type: multiple_choice
+  label: math_20200101_20200131_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20200701-20200731.jsonl
+  icl_task_type: multiple_choice
+  label: math_20200701_20200731_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20201201-20210131.jsonl
+  icl_task_type: multiple_choice
+  label: math_20201201_20210131_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20210701-20210831.jsonl
+  icl_task_type: multiple_choice
+  label: math_20210701_20210831_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20220201-20220430.jsonl
+  icl_task_type: multiple_choice
+  label: math_20220201_20220430_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20220801-20221031.jsonl
+  icl_task_type: multiple_choice
+  label: math_20220801_20221031_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20230201-20230430.jsonl
+  icl_task_type: multiple_choice
+  label: math_20230201_20230430_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20230801-20231130.jsonl
+  icl_task_type: multiple_choice
+  label: math_20230801_20231130_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/math/20231201-20240229.jsonl
+  icl_task_type: multiple_choice
+  label: math_20231201_20240229_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20130401-20130930.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20130401_20130930_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20131001-20140331.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20131001_20140331_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20140401-20140731.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20140401_20140731_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20140801-20141130.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20140801_20141130_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20141201-20150331.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20141201_20150331_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20150801-20151231.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20150801_20151231_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20160101-20160531.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20160101_20160531_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20160601-20161031.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20160601_20161031_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20161101-20170331.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20161101_20170331_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20171001-20180331.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20171001_20180331_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20180401-20180930.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20180401_20180930_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20181001-20190228.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20181001_20190228_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20190301-20190731.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20190301_20190731_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20190801-20191231.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20190801_20191231_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20200101-20200531.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20200101_20200531_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20200601-20200930.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20200601_20200930_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20210201-20210531.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20210201_20210531_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20210601-20211031.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20210601_20211031_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20211101-20220531.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20211101_20220531_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20220601-20230131.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20220601_20230131_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20230201-20231031.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20230201_20231031_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/physics/20231101-20240331.jsonl
+#   icl_task_type: multiple_choice
+#   label: physics_20231101_20240331_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/salesforce/20130501-20140331.jsonl
+#   icl_task_type: multiple_choice
+#   label: salesforce_20130501_20140331_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/salesforce/20140401-20141231.jsonl
+#   icl_task_type: multiple_choice
+#   label: salesforce_20140401_20141231_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/salesforce/20150101-20150930.jsonl
+#   icl_task_type: multiple_choice
+#   label: salesforce_20150101_20150930_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/salesforce/20151001-20160630.jsonl
+#   icl_task_type: multiple_choice
+#   label: salesforce_20151001_20160630_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/salesforce/20160701-20170228.jsonl
+#   icl_task_type: multiple_choice
+#   label: salesforce_20160701_20170228_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/salesforce/20170301-20171031.jsonl
+#   icl_task_type: multiple_choice
+#   label: salesforce_20170301_20171031_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/salesforce/20171101-20181031.jsonl
+#   icl_task_type: multiple_choice
+#   label: salesforce_20171101_20181031_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/salesforce/20181101-20191031.jsonl
+#   icl_task_type: multiple_choice
+#   label: salesforce_20181101_20191031_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/salesforce/20191101-20210731.jsonl
+#   icl_task_type: multiple_choice
+#   label: salesforce_20191101_20210731_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/salesforce/20210801-20240331.jsonl
+#   icl_task_type: multiple_choice
+#   label: salesforce_20210801_20240331_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/tex/20130501-20130930.jsonl
+#   icl_task_type: multiple_choice
+#   label: tex_20130501_20130930_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/tex/20131001-20140228.jsonl
+#   icl_task_type: multiple_choice
+#   label: tex_20131001_20140228_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/tex/20140301-20140630.jsonl
+#   icl_task_type: multiple_choice
+#   label: tex_20140301_20140630_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/tex/20140701-20141130.jsonl
+#   icl_task_type: multiple_choice
+#   label: tex_20140701_20141130_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/tex/20141201-20150430.jsonl
+#   icl_task_type: multiple_choice
+#   label: tex_20141201_20150430_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/tex/20151001-20160331.jsonl
+#   icl_task_type: multiple_choice
+#   label: tex_20151001_20160331_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/tex/20160401-20160930.jsonl
+#   icl_task_type: multiple_choice
+#   label: tex_20160401_20160930_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/tex/20161001-20170331.jsonl
+#   icl_task_type: multiple_choice
+#   label: tex_20161001_20170331_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/tex/20170401-20171031.jsonl
+#   icl_task_type: multiple_choice
+#   label: tex_20170401_20171031_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/tex/20171101-20180430.jsonl
+#   icl_task_type: multiple_choice
+#   label: tex_20171101_20180430_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/tex/20180501-20181231.jsonl
+#   icl_task_type: multiple_choice
+#   label: tex_20180501_20181231_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/tex/20190101-20190731.jsonl
+#   icl_task_type: multiple_choice
+#   label: tex_20190101_20190731_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/tex/20190801-20200430.jsonl
+#   icl_task_type: multiple_choice
+#   label: tex_20190801_20200430_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/tex/20200501-20201231.jsonl
+#   icl_task_type: multiple_choice
+#   label: tex_20200501_20201231_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/tex/20210101-20210930.jsonl
+#   icl_task_type: multiple_choice
+#   label: tex_20210101_20210930_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/tex/20211001-20220731.jsonl
+#   icl_task_type: multiple_choice
+#   label: tex_20211001_20220731_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/tex/20220801-20230630.jsonl
+#   icl_task_type: multiple_choice
+#   label: tex_20220801_20230630_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/tex/20230701-20240331.jsonl
+#   icl_task_type: multiple_choice
+#   label: tex_20230701_20240331_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/unix/20130401-20130731.jsonl
+#   icl_task_type: multiple_choice
+#   label: unix_20130401_20130731_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/unix/20130801-20131130.jsonl
+#   icl_task_type: multiple_choice
+#   label: unix_20130801_20131130_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/unix/20140301-20140630.jsonl
+#   icl_task_type: multiple_choice
+#   label: unix_20140301_20140630_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/unix/20140701-20141031.jsonl
+#   icl_task_type: multiple_choice
+#   label: unix_20140701_20141031_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/unix/20150301-20150630.jsonl
+#   icl_task_type: multiple_choice
+#   label: unix_20150301_20150630_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/unix/20150701-20151031.jsonl
+#   icl_task_type: multiple_choice
+#   label: unix_20150701_20151031_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/unix/20160301-20160630.jsonl
+#   icl_task_type: multiple_choice
+#   label: unix_20160301_20160630_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/unix/20160701-20161031.jsonl
+#   icl_task_type: multiple_choice
+#   label: unix_20160701_20161031_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/unix/20170301-20170731.jsonl
+#   icl_task_type: multiple_choice
+#   label: unix_20170301_20170731_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/unix/20170801-20171130.jsonl
+#   icl_task_type: multiple_choice
+#   label: unix_20170801_20171130_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/unix/20171201-20180430.jsonl
+#   icl_task_type: multiple_choice
+#   label: unix_20171201_20180430_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/unix/20180501-20180930.jsonl
+#   icl_task_type: multiple_choice
+#   label: unix_20180501_20180930_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/unix/20190301-20190831.jsonl
+#   icl_task_type: multiple_choice
+#   label: unix_20190301_20190831_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/unix/20190901-20200331.jsonl
+#   icl_task_type: multiple_choice
+#   label: unix_20190901_20200331_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/unix/20200401-20200930.jsonl
+#   icl_task_type: multiple_choice
+#   label: unix_20200401_20200930_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/unix/20201001-20210630.jsonl
+#   icl_task_type: multiple_choice
+#   label: unix_20201001_20210630_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/unix/20210701-20220630.jsonl
+#   icl_task_type: multiple_choice
+#   label: unix_20210701_20220630_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+# - continuation_delimiter: '
+
+#     Answer: '
+#   dataset_uri: local_data/stackexchange_ppl_format/unix/20220701-20230831.jsonl
+#   icl_task_type: multiple_choice
+#   label: unix_20220701_20230831_ppl
+#   metric_names:
+#   - InContextLearningGoldPerplexityMetric
+#   num_fewshot:
+#   - 0
+#   prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/worldbuilding/20140901-20150331.jsonl
+  icl_task_type: multiple_choice
+  label: worldbuilding_20140901_20150331_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/worldbuilding/20150401-20150930.jsonl
+  icl_task_type: multiple_choice
+  label: worldbuilding_20150401_20150930_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/worldbuilding/20151001-20160331.jsonl
+  icl_task_type: multiple_choice
+  label: worldbuilding_20151001_20160331_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/worldbuilding/20160401-20160831.jsonl
+  icl_task_type: multiple_choice
+  label: worldbuilding_20160401_20160831_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/worldbuilding/20160901-20161231.jsonl
+  icl_task_type: multiple_choice
+  label: worldbuilding_20160901_20161231_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/worldbuilding/20170101-20170531.jsonl
+  icl_task_type: multiple_choice
+  label: worldbuilding_20170101_20170531_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/worldbuilding/20170601-20171031.jsonl
+  icl_task_type: multiple_choice
+  label: worldbuilding_20170601_20171031_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/worldbuilding/20171101-20180430.jsonl
+  icl_task_type: multiple_choice
+  label: worldbuilding_20171101_20180430_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/worldbuilding/20180501-20180930.jsonl
+  icl_task_type: multiple_choice
+  label: worldbuilding_20180501_20180930_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/worldbuilding/20190401-20191130.jsonl
+  icl_task_type: multiple_choice
+  label: worldbuilding_20190401_20191130_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/worldbuilding/20191201-20200630.jsonl
+  icl_task_type: multiple_choice
+  label: worldbuilding_20191201_20200630_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/worldbuilding/20200701-20210331.jsonl
+  icl_task_type: multiple_choice
+  label: worldbuilding_20200701_20210331_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/worldbuilding/20210401-20211231.jsonl
+  icl_task_type: multiple_choice
+  label: worldbuilding_20210401_20211231_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/worldbuilding/20220101-20221130.jsonl
+  icl_task_type: multiple_choice
+  label: worldbuilding_20220101_20221130_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''
+- continuation_delimiter: '
+
+    Answer: '
+  dataset_uri: local_data/stackexchange_ppl_format/worldbuilding/20221201-20240229.jsonl
+  icl_task_type: multiple_choice
+  label: worldbuilding_20221201_20240229_ppl
+  metric_names:
+  - InContextLearningGoldPerplexityMetric
+  num_fewshot:
+  - 0
+  prompt_string: ''

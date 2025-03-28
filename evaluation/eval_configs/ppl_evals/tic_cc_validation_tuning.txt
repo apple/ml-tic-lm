@@ -1,0 +1,10 @@
+s3://path/to/your/tic_cc_data/gs_10_of_10/201305/00000002.tar
+s3://path/to/your/tic_cc_data/gs_10_of_10/201312/00000002.tar
+s3://path/to/your/tic_cc_data/gs_10_of_10/201403/00000002.tar
+s3://path/to/your/tic_cc_data/gs_10_of_10/201404/00000002.tar
+s3://path/to/your/tic_cc_data/gs_10_of_10/201407/00000002.tar
+s3://path/to/your/tic_cc_data/gs_10_of_10/201408/00000002.tar
+s3://path/to/your/tic_cc_data/gs_10_of_10/201409/00000002.tar
+s3://path/to/your/tic_cc_data/gs_10_of_10/201410/00000002.tar
+s3://path/to/your/tic_cc_data/gs_10_of_10/201411/00000002.tar
+s3://path/to/your/tic_cc_data/gs_10_of_10/201412/00000002.tar

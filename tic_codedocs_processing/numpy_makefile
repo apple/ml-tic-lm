@@ -1,0 +1,30 @@
+SPHINXOPTS    ?=
+SPHINXBUILD   ?= LANG=C /home/${USER}/miniconda/envs/${VENV}/bin/sphinx-build
+PYTHON   ?= /home/${USER}/miniconda/envs/${VENV}/bin/python
+ALLSPHINXOPTS  = -j 16 -d build/doctrees $(SPHINXOPTS) source
+
+generate: build/generate-stamp
+
+clean:
+	-rm -rf build/* source/reference/generated
+
+build/generate-stamp: $(wildcard source/reference/*.rst)
+	mkdir -p build
+	touch build/generate-stamp
+
+html: generate
+	mkdir -p build/html build/doctrees
+	$(PYTHON) preprocess.py
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) build/html $(FILES)
+	$(PYTHON) postprocess.py html build/html/*.html
+	@echo
+	@echo "Build finished. The HTML pages are in build/html."
+ifeq (, $(shell which $(DOXYGEN)))
+	@echo "Unable to find 'Doxygen:$(DOXYGEN)', skip generating C/C++ API from comment blocks."
+else
+	$(DOXYGEN) build/doxygen/Doxyfile
+endif
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) build/html $(FILES)
+	$(PYTHON) postprocess.py html build/html/*.html
+	@echo
+	@echo "Build finished. The HTML pages are in build/html."

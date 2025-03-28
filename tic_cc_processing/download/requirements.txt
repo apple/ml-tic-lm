@@ -1,0 +1,13 @@
+loguru
+jsonlines
+pandas==2.1.4
+resiliparse==0.14.7
+trafilatura
+fastwarc
+zstandard
+jsonlines
+cloudpathlib
+s5cmd
+pysimdjson
+boto3
+s5cmd

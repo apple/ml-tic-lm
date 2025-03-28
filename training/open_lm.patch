@@ -1,0 +1,788 @@
+diff --git a/open_lm/distributed.py b/open_lm/distributed.py
+index 8c07d66391b409030b23ba001c6d0ec6c94affc7..d3457a036436ef9d7b235e7545b07b535a633239 100644
+--- a/open_lm/distributed.py
++++ b/open_lm/distributed.py
+@@ -3,6 +3,7 @@ import os
+ import logging
+ import torch
+ import torch.distributed as dist
++import datetime
+ 
+ 
+ def is_global_master(args):
+@@ -59,6 +60,9 @@ def init_distributed_device(args):
+     args.local_rank = 0
+     # For testing, allow forcing distributed mode to test distributed code path even on one gpu.
+     if is_using_distributed() or args.force_distributed:
++
++        timeout = datetime.timedelta(seconds=args.backend_timeout) if args.backend_timeout else None
++
+         if "SLURM_PROCID" in os.environ:
+             # DDP via SLURM
+             args.local_rank, args.rank, env_world_size = world_info_from_env()
+@@ -79,13 +83,14 @@ def init_distributed_device(args):
+                 init_method=args.dist_url,
+                 world_size=args.world_size,
+                 rank=args.rank,
++                timeout=timeout,
+             )
+         else:
+             # DDP via torchrun, torch.distributed.launch
+             # Note that this currently assumes that the world size is all gpus in a node.
+             assert args.preset_world_size is None, "--preset_world_size with torchrun is not currently supported."
+             args.local_rank, _, _ = world_info_from_env()
+-            torch.distributed.init_process_group(backend=args.dist_backend, init_method=args.dist_url)
++            torch.distributed.init_process_group(backend=args.dist_backend, init_method=args.dist_url, timeout=timeout)
+             args.world_size = torch.distributed.get_world_size()
+             args.rank = torch.distributed.get_rank()
+         args.distributed = True
+@@ -117,3 +122,14 @@ def all_gather_object(args, obj, dst=0):
+     objects = [None for _ in range(args.world_size)]
+     dist.all_gather_object(objects, obj)
+     return objects
++
++
++def reduce_tensor(inp_tensor: torch.Tensor, reduction='mean') -> torch.Tensor:
++    size = dist.get_world_size() if dist.is_initialized() else 1
++    inp_tensor_clone = inp_tensor.clone().detach()
++    dist.all_reduce(inp_tensor_clone, op=dist.ReduceOp.SUM)
++
++    if reduction=='mean':
++        return inp_tensor_clone / size
++    elif reduction=='sum':
++        return inp_tensor_clone
+diff --git a/open_lm/file_utils.py b/open_lm/file_utils.py
+index f91919b262f08ded60894e0fe4dc21b787dbf244..12b6ea8830b118470ae4135c3b8f69002dd9ab23 100644
+--- a/open_lm/file_utils.py
++++ b/open_lm/file_utils.py
+@@ -76,7 +76,6 @@ def remote_sync_with_expon_backoff(sync_every, local_dir, remote_dir, protocol,
+         success = remote_sync(local_dir, remote_dir, protocol)
+         if success:
+             return True
+-
+     return False
+ 
+ 
+diff --git a/open_lm/losses.py b/open_lm/losses.py
+index ef3839d674f34b02d2f004123ae214c2f1151f83..fc8070b4a3dce36027da958a5f28b17435ea03a7 100644
+--- a/open_lm/losses.py
++++ b/open_lm/losses.py
+@@ -1,7 +1,21 @@
+ import torch
+ from torch import Tensor
+ from torch.nn import CrossEntropyLoss
++from tqdm import tqdm
++from open_lm.data import sample_chunk
++from open_lm.distributed import is_master, reduce_tensor, all_gather_object
++from open_lm.precision import get_autocast
++from contextlib import nullcontext
++from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
++from collections import Counter
++import logging
++import warnings
+ 
++def get_full_params_context(model, use_fsdp=False, writeback=False, with_grads=False):
++    if use_fsdp:
++        return FSDP.summon_full_params(model, writeback=writeback, with_grads=with_grads)
++    else:
++        return nullcontext()
+ 
+ class CrossEntropyLossWithZLoss(CrossEntropyLoss):
+     def __init__(
+@@ -19,3 +33,114 @@ class CrossEntropyLossWithZLoss(CrossEntropyLoss):
+ 
+     def forward(self, input: Tensor, target: Tensor) -> Tensor:
+         return super().forward(input, target) + self.eps * torch.square(torch.logsumexp(input, dim=-1)).mean()
++
++
++class EWC:
++    def __init__(self, args, model, loss, dataloader):
++        """Inspired by https://github.com/moskomule/ewc.pytorch/blob/master/utils.py
++
++        and https://avalanche-api.continualai.org/en/v0.5.0/_modules/avalanche/training/plugins/ewc.html#EWCPlugin
++        """
++        self.num_iterations = args.ewc_num_iterations
++        self.penalty = args.ewc_weight
++        self.uses_fsdp = args.fsdp
++        self._means, self._precision_matrices, self.params_with_grad = self._diag_fisher(
++            args, model, loss, dataloader
++        )
++
++    def _diag_fisher(self, args, model, loss, dataloader):
++        """NOTE: This is an approximation to the Fisher."""
++        # Initialize mean vector and precision matrix
++        device = torch.device(args.device)
++        autocast = get_autocast(args.precision)
++        means = {}
++        precision_matrices = {}
++        with get_full_params_context(model, use_fsdp=self.uses_fsdp, with_grads=True):
++            for n, p in model.named_parameters():
++                if p.requires_grad:
++                    means[n] = p.clone().detach()
++                    precision_matrices[n] = p.clone().detach().zero_()
++                    means[n].requires_grad = False
++                    precision_matrices[n].requires_grad = False
++        param_names = means.keys()
++        if is_master(args):
++            data_iterator = tqdm(enumerate(dataloader), total=self.num_iterations)
++        else:
++            data_iterator = enumerate(dataloader)
++        for batch_id, batch in data_iterator:
++            if batch_id > self.num_iterations:
++                break
++
++            # move to device
++            (texts,) = batch
++            texts = torch.LongTensor(texts).to(device)
++
++            with autocast():
++                inputs, targets = sample_chunk(texts, args)
++                out, _, _ = model(inputs)
++
++                total_lm_loss = loss(out.reshape(-1, args.vocab_size), targets.reshape(-1))
++                total_loss = total_lm_loss
++
++            print("Total loss:", total_loss)
++            total_loss.backward()
++
++            # Update the precision matrix
++            # NOTE: This is an approximation to the Fisher
++            params_with_grad = []
++            with get_full_params_context(model, use_fsdp=self.uses_fsdp, with_grads=True):
++                for n, p in model.named_parameters():
++                    if n in param_names:
++                        print("Updating precision matrix for", n)
++                        if p.grad is not None:
++                            params_with_grad.append(n)
++                            precision_matrices[n] += p.grad ** 2
++                            logging.info(f"\tWas able to update precision matrix for {n}")
++                        else:
++                            logging.info(f"\tCouldn't update precision matrix for {n}")
++
++            # set the gradient to zero or None
++            model.zero_grad()
++
++        global_params_with_grad = [n for names in all_gather_object(args, params_with_grad) for n in names]
++        global_params_with_grad = Counter(global_params_with_grad)
++        print(global_params_with_grad, len(global_params_with_grad))
++
++        # Aggregate all precision matrices post-compute
++        for n in param_names:
++            if global_params_with_grad[n] > 1:
++                precision_matrices[n] = reduce_tensor(precision_matrices[n], reduction='mean')
++
++        for n in param_names:
++            means[n] = means[n].detach()
++            means[n].requires_grad = False
++            precision_matrices[n] = precision_matrices[n].detach()
++            precision_matrices[n].requires_grad = False
++
++        return means, precision_matrices, params_with_grad
++
++    # This does not really work with fsdp as it is
++    def compute_penalty(self, model, with_grads=True) -> torch.Tensor:
++        loss = 0
++        if self.uses_fsdp and not with_grads:
++            warnings.warn("Attempting to compute penalty with FSDP enabled. This works for computing loss but likely won't allow for backprop.")
++        with get_full_params_context(model, use_fsdp=self.uses_fsdp, with_grads=with_grads):
++            for n, p in model.named_parameters():
++                if n in self._means:
++                    # NOTE: This should be with 0.5
++                    _loss = 0.5 * self._precision_matrices[n] * (p - self._means[n]) ** 2
++                    loss += _loss.sum()
++        return loss / self.num_iterations
++
++    # This works with fsdp
++    def add_grad(self, model, gradient_scaler=None) -> torch.Tensor:
++        with get_full_params_context(model, use_fsdp=self.uses_fsdp, writeback=True, with_grads=True):
++            with torch.no_grad():
++                for n, p in model.named_parameters():
++                    if n in self._means:
++                        # NOTE: This should not have 2*
++                        grad = self._precision_matrices[n] * (p - self._means[n])
++                        if gradient_scaler is not None:
++                            grad *= gradient_scaler.get_scale()
++                        grad *= self.penalty / self.num_iterations
++                        p.grad += grad
+diff --git a/open_lm/main.py b/open_lm/main.py
+index 7c80f55886d77711e50d5f02c0e10a266d362df1..f5e05d828c058b17c7401427e29ad6e72bdecab8 100644
+--- a/open_lm/main.py
++++ b/open_lm/main.py
+@@ -1,5 +1,6 @@
+ import atexit
+ import logging
++import copy
+ import os
+ import re
+ import sys
+@@ -10,6 +11,8 @@ import numpy as np
+ from pathlib import Path
+ import json
+ import traceback
++import schedulefree
++import warnings
+ 
+ import fsspec
+ import torch
+@@ -51,7 +54,7 @@ from open_lm.data import get_data, get_wds_dataset
+ from open_lm.distributed import is_master, init_distributed_device, broadcast_object
+ from open_lm.logger import setup_logging
+ from open_lm.params import parse_args
+-from open_lm.scheduler import cosine_lr, const_lr
++from open_lm.scheduler import cosine_lr, const_lr, rsqrt_lr
+ from open_lm.train import train_one_epoch
+ from open_lm.evaluate import evaluate_loop
+ from open_lm.file_utils import (
+@@ -64,6 +67,7 @@ from open_lm.file_utils import (
+     log_num_checkpoints,
+     terminate_sync_process,
+ )
++from open_lm.losses import EWC
+ 
+ 
+ LATEST_CHECKPOINT_NAME = "epoch_latest.pt"
+@@ -209,9 +213,15 @@ def save_checkpoint(
+     averagers=None,
+     failed=False,
+ ):
++    # Necessary according to https://github.com/facebookresearch/schedule_free?tab=readme-ov-file#how-to-use
++    if args.optimizer == "schedulefree":
++        optimizer.eval()
++        model.eval()
++
+     cpu_state, optim_state = None, None
+     if args.logs and args.logs.lower() != "none" and args.fsdp:
+-        save_policy = FullStateDictConfig(offload_to_cpu=True, rank0_only=True)
++        rank0_only = not args.log_local
++        save_policy = FullStateDictConfig(offload_to_cpu=True, rank0_only=rank0_only)
+         with FSDP.state_dict_type(model, StateDictType.FULL_STATE_DICT, save_policy):
+             cpu_state = model.state_dict()
+             optim_state = FSDP.optim_state_dict(model, optimizer)
+@@ -380,7 +390,7 @@ def main(args):
+     args.tensorboard = "tensorboard" in args.report_to or "all" in args.report_to
+     args.checkpoint_path = os.path.join(log_base_path, "checkpoints")
+     args.failed_checkpoint_path = os.path.join(log_base_path, "checkpoints_failed")
+-    if is_master(args):
++    if is_master(args, local=args.log_local):
+         args.tensorboard_path = os.path.join(log_base_path, "tensorboard") if args.tensorboard else ""
+         for dirname in [args.tensorboard_path, args.checkpoint_path, args.failed_checkpoint_path]:
+             if dirname:
+@@ -424,9 +434,9 @@ def main(args):
+     # start the sync proces if remote-sync is not None
+     remote_sync_process = None
+     if is_master(args) and args.remote_sync is not None:
+-        # first make sure it works
++        # first make sure it works: here, remote_sync_frequency is set to 0 for this initial test
+         result = remote_sync_with_expon_backoff(
+-            args.remote_sync_frequency,
++            0,
+             os.path.join(args.logs, args.name),
+             os.path.join(args.remote_sync, args.name),
+             args.remote_sync_protocol,
+@@ -474,6 +484,11 @@ def main(args):
+         with torch.device("meta" if args.experimental_meta_device and args.fsdp else args.device):
+             model = create_model(args)
+ 
++    lwf_model = None
++    if args.lwf_weight > 0.0:
++        lwf_model = copy.deepcopy(model)
++        lwf_model.eval()
++
+     args.vocab_size = model.vocab_size
+     args.seq_len = model.seq_len
+     if args.train_num_samples is not None:
+@@ -559,6 +574,18 @@ def main(args):
+                 **fsdp_kwargs,
+             )
+ 
++            if lwf_model:
++                lwf_model = FSDP(
++                    lwf_model,
++                    auto_wrap_policy=transformer_auto_wrapper_policy,
++                    device_id=device,
++                    mixed_precision=mp_policy,
++                    cpu_offload=CPUOffload(offload_params=args.fsdp_cpu_offload),
++                    use_orig_params=args.fsdp_use_orig_params,
++                    limit_all_gathers=args.fsdp_limit_all_gathers,
++                    **fsdp_kwargs,
++            )
++
+             print(f"After FSDP parameter num: {sum(p.numel() for p in model.parameters()):,} on rank {args.rank}")
+             print(f"After FSDP {torch.cuda.memory_allocated()/1024**3:.3} GB on rank {args.rank}")
+         else:
+@@ -572,7 +599,7 @@ def main(args):
+     if args.resume is not None and averagers is not None:
+         load_avg_models(args, averagers)
+ 
+-    if is_master(args):
++    if is_master(args, local=args.log_local):
+         logging.info(f"Model (has {sum(p.numel() for p in model.parameters() if p.requires_grad)} parameters):")
+         logging.info(f"{str(model)}")
+         logging.info("Params:")
+@@ -598,6 +625,13 @@ def main(args):
+         else:
+             load_model(args, model, different_seed=True)
+             args.resume = None
++
++        if lwf_model:
++            args.resume = args.pretrained
++            load_model(args, lwf_model, different_seed=True)
++            args.resume = None
++            #lwf_model.load_state_dict(model.state_dict())
++
+     elif args.average is not None:
+         num_models_to_average = len(args.average)
+         print(
+@@ -641,19 +675,31 @@ def main(args):
+         no_decay_params = []  # to be potentially used later
+         params = [p for n, p in named_parameters if p.requires_grad]
+ 
+-        optimizer = optim.AdamW(
+-            [
+-                {"params": no_decay_params, "weight_decay": 0.0},
+-                {"params": params, "weight_decay": args.wd},
+-            ],
+-            lr=args.lr,
+-            betas=(args.beta1, args.beta2),
+-            eps=args.eps,
+-        )
+-        scaler = None
+-        if args.precision == "amp":
+-            assert not args.fsdp, "FSDP not supported with amp, only amp_bfloat16"
+-            scaler = GradScaler()
++        if args.optimizer == 'adamw':
++            optimizer = optim.AdamW(
++                [
++                    {"params": no_decay_params, "weight_decay": 0.0},
++                    {"params": params, "weight_decay": args.wd},
++                ],
++                lr=args.lr,
++                betas=(args.beta1, args.beta2),
++                eps=args.eps,
++            )
++            scaler = None
++            if args.precision == "amp":
++                assert not args.fsdp, "FSDP not supported with amp, only amp_bfloat16"
++                scaler = GradScaler()
++        elif args.optimizer == 'schedulefree':
++            optimizer = schedulefree.AdamWScheduleFree(
++                [
++                    {"params": no_decay_params, "weight_decay": 0.0},
++                    {"params": params, "weight_decay": args.wd},
++                ],
++                lr=args.lr,
++                betas=(args.beta1, args.beta2),
++                eps=args.eps,
++                #=args.warmup,   # Let's see if we can use our own warmup scheduler to do this?
++            )
+ 
+     # initialize datasets
+     # use tokenizer=None because the data is already pre-tokenized.
+@@ -681,6 +727,8 @@ def main(args):
+             logging.info("Compiling averagers...")
+             for k in averagers.avgs_dict:
+                 averagers.avgs_dict[k].av_model = torch.compile(averagers.avgs_dict[k].av_model)
++        if lwf_model:
++            lwf_model = torch.compile(lwf_model)
+ 
+     # optionally resume optimizer from a checkpoint
+     # this needs to be after torchcompile
+@@ -696,6 +744,8 @@ def main(args):
+             total_steps = (data["train"].dataloader.num_batches) * args.epochs
+ 
+         if args.lr_scheduler == "cosine":
++            if args.optimizer == "schedulefree":
++                warnings.warn("Cosine scheduler is not intended for schedule-free optimizer, though can be used.")
+             scheduler = cosine_lr(
+                 optimizer,
+                 args.lr,
+@@ -713,11 +763,22 @@ def main(args):
+                 # args.lr_cooldown_end,
+                 # args.force_min_lr,
+             )
++        elif args.lr_scheduler == "rsqrt":
++            scheduler = rsqrt_lr(
++                optimizer,
++                args.lr,
++                args.warmup,
++                args.lr_rsqrt_cooldown,
++                total_steps,
++                args.lr_cooldown_end,
++                args.force_min_lr,
++                args.lr_starting_step
++            )
+         else:
+-            raise ValueError(f"Unknown scheduler, {args.lr_scheduler}. Available options are: cosine, const.")
++            raise ValueError(f"Unknown scheduler, {args.lr_scheduler}. Available options are: cosine, const, rsqrt.")
+ 
+     # determine if this worker should save logs and checkpoints. only do so if it is rank == 0
+-    args.save_logs = args.logs and args.logs.lower() != "none" and is_master(args)
++    args.save_logs = args.logs and args.logs.lower() != "none" and is_master(args, local=args.log_local)
+     writer = None
+     if args.save_logs and args.tensorboard:
+         assert tensorboard is not None, "Please install tensorboard."
+@@ -770,6 +831,48 @@ def main(args):
+     if args.dataset_manifest:
+         log_num_checkpoints(total_steps, args)
+ 
++    ewc_model = None
++    if args.ewc_weight > 0.0:
++        if args.dataset_manifest is not None:
++            assert not args.dataset_resampled, "dataset_manifest and dataset_resampled are mutually exclusive"
++            next_shard_per_source_orig = next_shard_per_source
++            (
++                train_data_string_per_source,
++                num_samples_per_source,
++                next_shard_per_source,
++            ) = get_string_for_epoch(
++                args.train_num_samples,
++                next_shard_per_source,
++                args.dataset_manifest,
++                args.train_data_mix_weights,
++                args.workers,
++                args.world_size,
++                multi_epoch=args.multiple_data_passes,
++                shard_shuffle_seed=args.shard_shuffle_seed + 42,   # Hard-coded to be different from the seed for actual training
++            )
++
++            # In the distributed case, make sure that all nodes receive the same string
++            if args.distributed:
++                all_source_strings = ["" for _ in range(args.world_size)]
++                dist.all_gather_object(all_source_strings, train_data_string_per_source)
++                assert all(
++                    [x == train_data_string_per_source for x in all_source_strings]
++                ), "Dataset to train on is not the same across all nodes. This should not happen normally, unless there is an issue with shard shuffling during the dataset generation."
++
++        old_data_train = data["train"]
++        if data["train"] is not None:
++            del data["train"]
++        args.train_data = train_data_string_per_source
++
++        # Draw num_samples_per_source at most from dataset - rounded down to guarantee uniqueness.
++        data["train"] = get_wds_dataset(
++            args, True, 0, force_num_samples=num_samples_per_source, data_key=args.data_key, floor=True
++        )
++        ewc_model = EWC(args, model, loss, data["train"].dataloader)
++        logging.info("EWC model created successfully.")
++        data["train"] = old_data_train # Restore the original data for actual training
++        next_shard_per_source = next_shard_per_source_orig
++
+     # Only enter training loop if there are steps to be done.
+     done_training = global_step >= total_steps
+     epoch = start_epoch
+@@ -779,6 +882,7 @@ def main(args):
+             logging.info(f"Start epoch {epoch}")
+ 
+         if args.dataset_manifest is not None:
++            logging.info(f"Reinitializing dataloader")
+             assert not args.dataset_resampled, "dataset_manifest and dataset_resampled are mutually exclusive"
+             (
+                 train_data_string_per_source,
+@@ -819,6 +923,7 @@ def main(args):
+         if args.distributed:
+             dist.barrier()
+ 
++        logging.info(f"Starting training loop for epoch {epoch}")
+         success, global_step = train_one_epoch(
+             model,
+             data,
+@@ -832,6 +937,8 @@ def main(args):
+             total_steps=total_steps,
+             args=args,
+             tb_writer=writer,
++            lwf_model=lwf_model,
++            ewc_model=ewc_model,
+         )
+ 
+         if args.distributed:
+@@ -931,8 +1038,9 @@ def main(args):
+     if remote_sync_process is not None:
+         logging.info("Final remote sync.")
+         terminate_sync_process(remote_sync_process)
++        # Can just pass in sync_every=0 for last sync, otherwise will unecessarily sleep.
+         result = remote_sync_with_expon_backoff(
+-            args.remote_sync_frequency,
++            0,
+             os.path.join(args.logs, args.name),
+             os.path.join(args.remote_sync, args.name),
+             args.remote_sync_protocol,
+diff --git a/open_lm/model_configs/open_lm_3b_swiglutorch.json b/open_lm/model_configs/open_lm_3b_swiglutorch.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..a0c78449abc7a48441b674dc3eaa1dfd054b2992
+--- /dev/null
++++ b/open_lm/model_configs/open_lm_3b_swiglutorch.json
+@@ -0,0 +1,10 @@
++{
++    "hidden_dim": 2560,
++    "n_layers": 32,
++    "n_heads": 32,
++    "seq_len": 2048,
++    "vocab_size": 50432,
++    "post_embed_norm": false,
++    "weight_tying": false,
++    "ffn_type": "swiglu_torch"
++}
+diff --git a/open_lm/model_configs/open_lm_7b_swiglutorch.json b/open_lm/model_configs/open_lm_7b_swiglutorch.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..4ef5dfc7e8634742213438ecddfda56cdb29bd88
+--- /dev/null
++++ b/open_lm/model_configs/open_lm_7b_swiglutorch.json
+@@ -0,0 +1,10 @@
++{
++    "hidden_dim": 4096,
++    "n_layers": 32,
++    "n_heads": 32,
++    "seq_len": 2048,
++    "vocab_size": 50432,
++    "post_embed_norm": false,
++    "weight_tying": false,
++    "ffn_type": "swiglu_torch"
++}
+\ No newline at end of file
+diff --git a/open_lm/params.py b/open_lm/params.py
+index 0a7a3f64a3f343c361eaffde49f65861785326ac..8742d24c5b78abcec48ce5325230f3463d1df18c 100644
+--- a/open_lm/params.py
++++ b/open_lm/params.py
+@@ -241,9 +241,9 @@ def check_args(args):
+             if args.remote_sync_protocol != "s3":
+                 raise ValueError("Sync protocol not supported when using resume latest.")
+ 
+-    if args.lr_scheduler not in {"cosine", "const", "const-cooldown"}:
++    if args.lr_scheduler not in {"cosine", "const", "const-cooldown", "rsqrt"}:
+         raise ValueError(
+-            f"Unknown scheduler, {args.lr_scheduler}. Available options are: cosine, const, const-cooldown."
++            f"Unknown scheduler, {args.lr_scheduler}. Available options are: cosine, const, const-cooldown, rsqrt."
+         )
+ 
+     if args.experimental_meta_device:
+@@ -405,7 +405,7 @@ def parse_args(args):
+         "--lr-scheduler",
+         type=str,
+         default="cosine",
+-        help="LR scheduler. One of: 'cosine', 'const' (constant), 'const-cooldown' (constant w/ cooldown). Default: cosine",
++        help="LR scheduler. One of: 'cosine', 'const' (constant), 'const-cooldown' (constant w/ cooldown), 'rsqrt'. Default: cosine",
+     )
+     parser.add_argument(
+         "--lr-cooldown-end",
+@@ -419,6 +419,18 @@ def parse_args(args):
+         default=1.0,
+         help="Power for polynomial cooldown schedule. Default: 1.0 (linear decay)",
+     )
++    parser.add_argument(
++        "--lr-rsqrt-cooldown",      # TODO: Later we can make this more generic if needed
++        type=int,
++        default=5000,
++        help="Number of steps to cooldown for when using rsqrt scheduler.",
++    )
++    parser.add_argument(
++        "--lr-starting-step",
++        type=int,
++        default=0,
++        help="Starting step for rsqrt scheduler.",
++    )
+     parser.add_argument(
+         "--force-min-lr",
+         type=float,
+@@ -787,6 +799,23 @@ def parse_args(args):
+         default=0,
+         help="This is the maximum number of failed checkpoints (due to not having seen enough tokens) that are allowed",
+     )
++    parser.add_argument(
++        "--backend-timeout",
++        type=int,
++        default=None,
++        help="This the number of seconds passed into the timeout arg for torch.distributed.init_process_group.",
++    )
++    parser.add_argument("--lwf-weight", type=float, default=0.0, help="LwF loss weight.")
++    parser.add_argument(
++        "--lwf-kl",
++        action='store_true',
++        default=False,
++        help="If true, LwF loss is computed KL instead of cross-entropy and argmax.",
++    )
++    parser.add_argument("--lwf-temperature", type=float, default=2.0, help="LwF softmax temperature.")
++    parser.add_argument("--ewc-weight", type=float, default=0.0, help="EwC loss weight.")
++    parser.add_argument("--ewc-num-iterations", type=int, default=1000, help="EwC number of approximation steps.")
++    parser.add_argument("--ewc-log-loss", action="store_true", help="Compute EwC loss for logging despite not needing it for backprop.")
+ 
+     add_model_args(parser)
+ 
+diff --git a/open_lm/scheduler.py b/open_lm/scheduler.py
+index 2505e57b21242ab4955d926089f1c4f85ffcfeaf..475fac7d3c86f16c176eeccb335c5264e5ae7754 100644
+--- a/open_lm/scheduler.py
++++ b/open_lm/scheduler.py
+@@ -63,3 +63,23 @@ def cosine_lr(optimizer, base_lr, warmup_length, steps, min_lr, force_min_lr):
+         return lr
+ 
+     return _lr_adjuster
++
++def rsqrt_lr(optimizer, base_lr, warmup_length, cooldown_length, steps, min_lr, force_min_lr, starting_step=0):
++    def _lr_adjuster(step):
++        step = step + starting_step
++        if step < warmup_length:
++            lr = _warmup_lr(base_lr, warmup_length, step)
++        elif cooldown_length == 0 or step < steps - cooldown_length:
++            lr = (base_lr - min_lr) * np.sqrt(warmup_length) / np.sqrt(step) + min_lr
++        else:
++            start_cooldown_step = steps - cooldown_length
++            start_cooldown_lr = (base_lr - min_lr) * np.sqrt(warmup_length) / np.sqrt(start_cooldown_step) + min_lr
++            e = step - start_cooldown_step
++            decay = (1 - (e / cooldown_length))
++            lr = decay * (start_cooldown_lr - min_lr) + min_lr
++            lr = max(lr, force_min_lr)
++
++        assign_learning_rate(optimizer, lr)
++        return lr
++
++    return _lr_adjuster
+\ No newline at end of file
+diff --git a/open_lm/train.py b/open_lm/train.py
+index 0d54bf7005a849e38a0a7d9eb003acf3e1a3dca2..2260cbaa276cabb2d77ae34fc9135400f59094d5 100644
+--- a/open_lm/train.py
++++ b/open_lm/train.py
+@@ -9,6 +9,7 @@ import torch
+ import torch.distributed as dist
+ from torch.distributed.distributed_c10d import ReduceOp
+ from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
++import torch.nn.functional as F
+ 
+ try:
+     from megablocks.layers.moe import batched_load_balancing_loss, clear_load_balancing_loss
+@@ -44,7 +45,8 @@ def backward(total_loss, scaler):
+ 
+ 
+ def train_one_epoch(
+-    model, data, loss, epoch, step, optimizer, scaler, scheduler, total_steps, args, tb_writer=None, averagers=None
++    model, data, loss, epoch, step, optimizer, scaler, scheduler, total_steps, args,
++    tb_writer=None, averagers=None, lwf_model=None, ewc_model=None,
+ ):
+     """Trains model for one epoch on the provided data.
+ 
+@@ -58,6 +60,9 @@ def train_one_epoch(
+     autocast = get_autocast(args.precision)
+ 
+     model.train()
++    # Necessary according to https://github.com/facebookresearch/schedule_free?tab=readme-ov-file#how-to-use
++    if args.optimizer == "schedulefree":
++        optimizer.train()
+ 
+     data["train"].set_epoch(epoch)  # set epoch in process safe manner via sampler or shared_epoch
+     dataloader = data["train"].dataloader
+@@ -65,6 +70,8 @@ def train_one_epoch(
+     sample_digits = math.ceil(math.log(dataloader.num_samples + 1, 10))
+ 
+     losses_m = AverageMeter()
++    lwf_losses_m = AverageMeter() if lwf_model is not None else None
++    ewc_losses_m = AverageMeter() if ewc_model is not None else None
+     load_balancing_losses_m = AverageMeter()
+     batch_time_m = AverageMeter()
+     data_time_m = AverageMeter()
+@@ -129,6 +136,9 @@ def train_one_epoch(
+                 forward_start = time.time()
+                 inputs, targets = sample_chunk(texts, args)
+                 out, _, _ = model(inputs)
++                if lwf_model is not None:
++                    with torch.no_grad():
++                        lwf_out, _, _ = lwf_model(inputs)
+                 forward_time_m.update(time.time() - forward_start)
+ 
+                 if args.log_logit_mean:
+@@ -136,6 +146,20 @@ def train_one_epoch(
+ 
+                 total_lm_loss = loss(out.reshape(-1, args.vocab_size), targets.reshape(-1))
+                 total_loss = total_lm_loss
++                if lwf_model is not None:
++                    if args.lwf_kl:
++                        # Apply KL loss with no zloss
++                        # Reference implementation: https://avalanche-api.continualai.org/en/v0.5.0/_modules/avalanche/training/regularization.html#LearningWithoutForgetting
++                        lwf_p = F.log_softmax(lwf_out.reshape(-1, args.vocab_size) /
++                                              args.lwf_temperature, dim=1)
++                        out_p = F.log_softmax(out.reshape(-1, args.vocab_size) /
++                                              args.lwf_temperature, dim=1)
++                        lwf_loss = F.kl_div(out_p, lwf_p, log_target=True)
++                    else:
++                        # Apply the same loss as above, eg zloss
++                        lwf_targets = lwf_out.reshape(-1, args.vocab_size).argmax(1)
++                        lwf_loss = F.cross_entropy(out.reshape(-1, args.vocab_size), lwf_targets.reshape(-1))
++                    total_loss += args.lwf_weight * lwf_loss
+                 if args.moe_freq > 0:
+                     total_load_balancing_loss = batched_load_balancing_loss(moe_args)
+                     clear_load_balancing_loss()
+@@ -145,6 +169,13 @@ def train_one_epoch(
+             backward(total_loss, scaler)
+             backward_time_m.update(time.time() - backward_start)
+ 
++            # Add EWC gradients directly for better interaction with FSDP
++            if ewc_model is not None:
++                ewc_model.add_grad(model, scaler)
++                if args.ewc_log_loss:
++                    ewc_loss = ewc_model.compute_penalty(model, with_grads=False)
++                    total_loss += args.ewc_weight * ewc_loss
++
+             if averagers is not None and args.log_avg_model_training_loss and i % args.log_avg_model_training_loss == 0:
+                 with autocast():
+                     for key, averager in averagers.avgs_dict.items():
+@@ -235,6 +266,11 @@ def train_one_epoch(
+             backward_time_m.update(backward_total_time)
+ 
+             total_loss = total_lm_loss
++            if ewc_model is not None:
++                ewc_model.add_grad(model, scaler)
++                if args.ewc_log_loss:
++                    ewc_loss = ewc_model.compute_penalty(model, with_grads=False)
++                    total_loss += args.ewc_weight * ewc_loss
+             if args.moe_freq > 0:
+                 total_loss += total_load_balancing_loss
+ 
+@@ -258,6 +294,9 @@ def train_one_epoch(
+             averagers.step()
+ 
+         global_loss_tensor = total_loss.detach().clone()
++        global_lwf_loss_tensor = lwf_loss.detach().clone() if lwf_model is not None else None
++        global_ewc_loss_tensor = ewc_loss.detach().clone() if (ewc_model is not None and args.ewc_log_loss) else None
++
+         if averagers is not None and args.log_avg_model_training_loss and i % args.log_avg_model_training_loss == 0:
+             # same for the average model loss
+             for key, value in total_loss_avg.items():
+@@ -266,6 +305,7 @@ def train_one_epoch(
+         sync_start = time.time()
+         if args.world_size > 1:
+             dist.all_reduce(global_loss_tensor, op=ReduceOp.AVG)
++            dist.all_reduce(global_lwf_loss_tensor, op=ReduceOp.AVG) if lwf_model is not None else None
+             if averagers is not None and args.log_avg_model_training_loss and i % args.log_avg_model_training_loss == 0:
+                 for key, value in total_loss_avg.items():
+                     dist.all_reduce(value, op=ReduceOp.AVG)
+@@ -290,6 +330,12 @@ def train_one_epoch(
+             if averagers is not None and args.log_avg_model_training_loss and i % args.log_avg_model_training_loss == 0:
+                 for key, value in total_loss_avg.items():
+                     losses_avg_m[key].update(value.item(), batch_size)
++
++            if lwf_model is not None:
++                lwf_losses_m.update(global_lwf_loss_tensor.item(), batch_size)
++            if ewc_model is not None and args.ewc_log_loss:
++                ewc_losses_m.update(global_ewc_loss_tensor.item(), batch_size)
++
+             if i % args.log_every_n_steps == 0 or batch_count == num_batches_per_epoch or step == total_steps - 1:
+                 num_samples = batch_count * batch_size * args.world_size
+                 samples_per_epoch = dataloader.num_samples
+@@ -345,6 +391,11 @@ def train_one_epoch(
+                 if args.log_logit_mean:
+                     log_data["logit_mean"] = logit_m.val
+ 
++                if lwf_model is not None:
++                    log_data["lwf_loss"] = lwf_losses_m.val
++                if ewc_model is not None and args.ewc_log_loss:
++                    log_data["ewc_loss"] = ewc_losses_m.val
++
+                 for name, val in log_data.items():
+                     name = "train/" + name
+                     if tb_writer is not None:
+diff --git a/requirements.txt b/requirements.txt
+index d8787cfb21d38f053b67cc6653e18276be531b9b..ddda5e90846e8b14a2f3deaf283eedf34bb00416 100644
+--- a/requirements.txt
++++ b/requirements.txt
+@@ -25,3 +25,4 @@ s3fs
+ wikipedia
+ ipython
+ mosaicml
++schedulefree

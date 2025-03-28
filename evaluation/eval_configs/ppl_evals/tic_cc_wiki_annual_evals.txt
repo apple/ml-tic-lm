@@ -1,0 +1,13 @@
+s3://path/to/your/tokenized/tic_cc_wiki_data/gs_10_of_10/201305/00000001.tar
+s3://path/to/your/tokenized/tic_cc_wiki_data/gs_10_of_10/201403/00000001.tar
+s3://path/to/your/tokenized/tic_cc_wiki_data/gs_10_of_10/201501/00000001.tar
+s3://path/to/your/tokenized/tic_cc_wiki_data/gs_10_of_10/201602/00000001.tar
+s3://path/to/your/tokenized/tic_cc_wiki_data/gs_10_of_10/201701/00000001.tar
+s3://path/to/your/tokenized/tic_cc_wiki_data/gs_10_of_10/201801/00000001.tar
+s3://path/to/your/tokenized/tic_cc_wiki_data/gs_10_of_10/201901/00000001.tar
+s3://path/to/your/tokenized/tic_cc_wiki_data/gs_10_of_10/202001/00000001.tar
+s3://path/to/your/tokenized/tic_cc_wiki_data/gs_10_of_10/202101/00000001.tar
+s3://path/to/your/tokenized/tic_cc_wiki_data/gs_10_of_10/202201/00000001.tar
+s3://path/to/your/tokenized/tic_cc_wiki_data/gs_10_of_10/202301/00000001.tar
+s3://path/to/your/tokenized/tic_cc_wiki_data/gs_10_of_10/202402/00000001.tar
+s3://path/to/your/tokenized/tic_cc_wiki_data/gs_10_of_10/202407/00000001.tar
