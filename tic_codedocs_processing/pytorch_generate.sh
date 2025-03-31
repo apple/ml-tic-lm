@@ -2,7 +2,15 @@
 
 # For licensing see accompanying LICENSE file.
 # Copyright (C) 2025 Apple Inc. All Rights Reserved.
-#
+
+NUM_THREADS=$(nproc --all)
+
+if [ -z "${CONDA_ROOT}" ]; then
+    CONDA_ROOT=$(conda info --base)
+    echo "CONDA_ROOT not provided, using default: ${CONDA_ROOT}"
+else
+    echo "Using provided CONDA_ROOT: ${CONDA_ROOT}"
+fi
 
 clone_pytorch_if_not_exists() {
     local PYTORCH_DIR="pytorch"
@@ -61,14 +69,14 @@ conda_initialized() {
 }
 
 
-conda_install_pytorch() {
+conda_setup_pytorch() {
     local torch_version="$1"
     #"pt_$torch_version"
     local venv="$2"
 
     if ! conda_initialized; then
         echo "Conda is not initialized. Running conda init..."
-        export PATH="$(conda info --base)/bin:${PATH}"
+        export PATH="${CONDA_ROOT}/bin:${PATH}"
         conda init bash
     fi
 
@@ -91,12 +99,14 @@ conda_install_pytorch() {
     esac
     echo "Going to install $torch_version with python=${python_version}"
     conda create -n $venv python=$python_version -y  --no-default-packages
-    source $(conda info --base)/etc/profile.d/conda.sh
+    source ${CONDA_ROOT}/etc/profile.d/conda.sh
     conda activate $venv
-    pip install packaging
-    pip install "numpy<2.0"
+    ${CONDA_ROOT}/envs/${venv}/bin/pip install packaging
+    ${CONDA_ROOT}/envs/${venv}/bin/pip install "numpy==1.26.4"
+    ${CONDA_ROOT}/envs/${venv}/bin/pip install "mkl==2024.0.0"
 
-    conda install ${cpu_package}==$torch_version torchvision cpuonly -c pytorch -y
+    # conda install ${cpu_package}==$torch_version torchvision cpuonly -c pytorch -y
+    ${CONDA_ROOT}/envs/${venv}/bin/pip install torch==$torch_version torchvision --index-url https://download.pytorch.org/whl/cpu
     echo "PyTorch $torch_version has been installed in the '$venv' environment"
 }
 
@@ -104,22 +114,22 @@ install_pytorch_from_source() {
     local VERSION="$1"
     local venv="$2"
     echo "Activating virtual environment: $venv"
-    pyenv activate "$venv"
+    conda install -c conda-forge libstdcxx-ng=12 -y
 
-    pip install cmake ninja
-    pip install -r requirements.txt
-    pip install packaging
-    pip install "numpy<2.0"
+    ${CONDA_ROOT}/envs/${venv}/bin/pip install cmake ninja
+    ${CONDA_ROOT}/envs/${venv}/bin/pip install -r requirements.txt
+    ${CONDA_ROOT}/envs/${venv}/bin/pip install packaging
+    ${CONDA_ROOT}/envs/${venv}/bin/pip install "numpy<2.0"
+    ${CONDA_ROOT}/envs/${venv}/bin/pip install "cmake<=3.31.0.1"
 
     export USE_CUDA=0
     export USE_CUDNN=0
     export USE_MKLDNN=1
-    export MAX_JOBS=8
-    if python setup.py install; then
+    export MAX_JOBS=${NUM_THREADS}
+    if ${CONDA_ROOT}/envs/${venv}/bin/python setup.py install; then
         echo "PyTorch $VERSION (CPU only) installed successfully in $venv"
     else
         echo "Error: Failed to build and install PyTorch"
-        pyenv deactivate
         return 1
     fi
 }
@@ -144,11 +154,11 @@ html2text() {
     echo "converting html docs to text via ${method}"
     case "$method" in
         readability)
-            find "$directory" -type f -name "*.html" -print0 | xargs -0 -P 16 -I {} node convert_readability.js "{}"
+            find "$directory" -type f -name "*.html" -print0 | xargs -0 -P ${NUM_THREADS} -I {} node convert_readability.js "{}"
             ;;
         trafilatura)
-            $(conda info --base)/envs/${venv}/bin/pip install -U trafilatura
-            find "$directory" -type f -name "*.html" -print0 | xargs -0 -P 16 -I {} $(conda info --base)/envs/${venv}/bin/python convert_trafilatura.py "{}"
+            ${CONDA_ROOT}/envs/${venv}/bin/pip install -U trafilatura
+            find "$directory" -type f -name "*.html" -print0 | xargs -0 -P ${NUM_THREADS} -I {} ${CONDA_ROOT}/envs/${venv}/bin/python convert_trafilatura.py "{}"
             ;;
         *)
             echo "Invalid method: $method"
@@ -162,10 +172,13 @@ html2text() {
 pytorch_bulild_docs() {
     local venv=$1
     cd docs
-    $(conda info --base)/envs/${venv}/bin/pip install packaging fsspec
-    $(conda info --base)/envs/${venv}/bin/pip install "numpy<2.0"
-    $(conda info --base)/envs/${venv}/bin/pip install -r requirements.txt
-    $(conda info --base)/envs/${venv}/bin/pip install "Jinja2<3.1"
+    # install katex for docs
+    npm install -g katex
+    ${CONDA_ROOT}/envs/${venv}/bin/pip install packaging fsspec
+    ${CONDA_ROOT}/envs/${venv}/bin/pip install "numpy<2.0"
+    ${CONDA_ROOT}/envs/${venv}/bin/pip install -r requirements.txt
+    ${CONDA_ROOT}/envs/${venv}/bin/pip install "Jinja2<3.1"
+    ${CONDA_ROOT}/envs/${venv}/bin/pip install -U matplotlib
     make clean
     make html
     cd ..
@@ -188,11 +201,12 @@ echo $1 $2
 clone_pytorch_if_not_exists
 cd pytorch
 checkout_pytorch_version $VERSION
-conda_install_pytorch $VERSION $VENV_NAME
+conda_setup_pytorch $VERSION $VENV_NAME
+# install_pytorch_from_source $VERSION $VENV_NAME
 pytorch_bulild_docs $VENV_NAME
 cd ..
 html2text "pytorch/docs/build/html/" $VENV_NAME $METHOD
-mkdir -p "./output"
-cp -r "pytorch/docs/build/html/" "./output/torch_${VERSION}_${METHOD}"
-$(conda info --base)/envs/${VENV_NAME}/bin/python pytorch_process.py $VERSION $METHOD
-
+mkdir -p "./output/pytorch"
+cp -r "pytorch/docs/build/html/" "./output/pytorch/v${VERSION}_${METHOD}"
+${CONDA_ROOT}/envs/${VENV_NAME}/bin/python pytorch_process.py $VERSION $METHOD
+rm -rf "./output/pytorch/v${VERSION}_${METHOD}"

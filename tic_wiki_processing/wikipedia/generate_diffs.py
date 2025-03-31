@@ -40,11 +40,11 @@ def diffsets_bash_script(dates, output_path, bucket_name, prefix):
     base_path = os.path.dirname(prefix.rstrip('/'))
     if base_path:
         base_path += '/'
-    
+
     # Define output directories using the base path
-    changed_wiki_dir = f"{base_path}diffest_changed_wiki/"
-    unchanged_wiki_dir = f"{base_path}diffest_unchanged_wiki/"
-    
+    changed_wiki_dir = f"{base_path}diffset_changed_wiki/"
+    unchanged_wiki_dir = f"{base_path}diffset_unchanged_wiki/"
+
     with open(output_path, "w") as script_file:
 
         len_dates = len(dates)

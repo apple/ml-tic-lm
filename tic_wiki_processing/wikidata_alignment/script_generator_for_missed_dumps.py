@@ -216,7 +216,7 @@ def main(min_date=None, num_diffs=None):
 
             script_lines.extend(
                 [
-                    f"aws s3 cp s3://tic-lm/eval_data/diffest_changed_wiki_v2/wiki_diff_{new_date_wiki}_{old_date_wiki}.csv Wikipedia_datasets/wiki_diff_{new_date_wiki}_{old_date_wiki}.csv &",
+                    f"aws s3 cp s3://tic-lm/eval_data/diffset_changed_wiki_v2/wiki_diff_{new_date_wiki}_{old_date_wiki}.csv Wikipedia_datasets/wiki_diff_{new_date_wiki}_{old_date_wiki}.csv &",
                 ]
             )
 

@@ -14,7 +14,9 @@ apt install p7zip-full
 ### Data Download
 
 1. Visit the Internet Archive's StackExchange data dump: https://archive.org/details/stackexchange, at the time we downloaded the data, the last modified date of the files were 07-Apr-2024.
-2. Download the relevant community data files (they are in 7z format).  In the paper, we mainly focus on StackOverflow and Math categories.
+2. Download the relevant community data files (they are in 7z format).  In the 
+   paper, we mainly focus on StackOverflow and Math categories. For testing, 
+   start with a smaller category such `ai` first.
 3. Organize the downloaded files in the following structure:
    ```
    src_data/
@@ -44,8 +46,20 @@ bash process_stackexchange_dumps.sh
 ```
 
 The script uploads the parsed StackExchange data for each category to S3 and 
-removes it from local directory. For evaluation, ensure that the data is 
-downloaded to `ml-tic-lm/evaluation/local_data/stackexchange`.
+removes it from local directory. To run the evaluations, the data is expected 
+to exist in the following paths relative to the root of the repository:
+```bash
+tic_stackexchange_local_path="local_data/stackexchange"
+```
+
+The scripts upload the data to S3 and remove the local copy. To download, run 
+the following commands:
+```bash
+mkdir -p evaluation/local_data/stackexchange/
+aws s3 cp <s3-path-to-upload>/tic-lm/eval_data/stackexchange/  evaluation/local_data/stackexchange/ --recursive
+```
+
+
 
 ## Pipeline Components
 

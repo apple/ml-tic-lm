@@ -97,7 +97,7 @@ def should_include(title: str, text: str) -> bool:
 
 def save_jsonl(data: list[dict], v: str):
     month, year = np_versions[v].split("/")
-    save_path = f"./output/np_{year}{month}.jsonl"
+    save_path = f"./output/numpy/{year}{month}.jsonl"
     with open(save_path, "w") as f:
         for d in data:
             f.write(json.dumps(d, ensure_ascii=False)+"\n")
@@ -107,7 +107,8 @@ def generate(v: str, method: str):
     assert v in np_versions
     assert method in ['readability', 'trafilatura']
     # find docs
-    root = f"./docs/numpy_{v}_{method}"
+    root = f"./output/numpy/v{v}_{method}"
+    print(f"collecting docs from {root=}")
     extract_dirs = [os.path.join(root, d) for d in ["reference", "user"]]
     htmls = []
     for ed in extract_dirs:

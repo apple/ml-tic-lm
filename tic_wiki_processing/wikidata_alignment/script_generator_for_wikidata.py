@@ -57,11 +57,11 @@ def add_wikipedia_algining_commands(date_parts):
         for mode in modes:
             if mode == "changed":
                 process_cmd.append(
-                    f"aws s3 cp s3://tic-lm/eval_data/diffest_changed_wiki_v2/wiki_diff_{wikipedia_end}_{wikipedia_start}.csv Wikipedia_datasets/wiki_diff_{wikipedia_end}_{wikipedia_start}.csv &\n"
+                    f"aws s3 cp s3://tic-lm/eval_data/diffset_changed_wiki_v2/wiki_diff_{wikipedia_end}_{wikipedia_start}.csv Wikipedia_datasets/wiki_diff_{wikipedia_end}_{wikipedia_start}.csv &\n"
                 )
             else:
                 process_cmd.append(
-                    f"aws s3 cp s3://tic-lm/eval_data/diffest_unchanged_wiki_v2/wiki_unchanged_{wikipedia_end}_{wikipedia_start}.csv Wikipedia_datasets/wiki_unchanged_{wikipedia_end}_{wikipedia_start}.csv &\n"
+                    f"aws s3 cp s3://tic-lm/eval_data/diffset_unchanged_wiki_v2/wiki_unchanged_{wikipedia_end}_{wikipedia_start}.csv Wikipedia_datasets/wiki_unchanged_{wikipedia_end}_{wikipedia_start}.csv &\n"
                 )
 
     process_cmd.append("wait\n")

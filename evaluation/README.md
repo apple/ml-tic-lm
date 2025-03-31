@@ -38,23 +38,25 @@ relevant directories in the root directory of this repository.
 - [`tic_stackexchange_processing`](../tic_stackexchange_proecssing/) for TiC-StackExchange
 - [`tic_codedocs_processing`](../tic_codedocs_processing/) for TiC-CodeDocs
 
-Scripts for each evaluation uploads the data to S3 paths that ensures the 
-scripts can run in parallel and once before evaluations. To run evaluations, 
-ensure that the data is downloaded from S3 paths to the following local paths:
+Scripts for each evaluation uploads the data to S3 paths on your specified 
+bucket that ensures the scripts can run in parallel and once before 
+evaluations.  To run evaluations, ensure that the data is downloaded from S3 
+paths to the following local paths:
 ```
 # remote paths
-tic_stackexchange_path="s3://<bucket>/prefix/ml-tic-lm/evaluation/local_data/stackexchange"
-tic_wiki_changed_path="s3://<bucket>/prefix/ml-tic-lm/evaluation/local_data/twiki_changed_textbased"
-tic_wiki_unchanged_path="s3://<bucket>/prefix/ml-tic-lm/evaluation/local_data/twiki_unchanged_textbased"
-tic_codedocs_numpy_path="s3://<bucket>/prefix/ml-tic-lm/evaluation/local_data/code_eval/numpy"
-tic_codedocs_pytorch_path="s3://<bucket>/prefix/ml-tic-lm/evaluation/local_data/code_eval/pytorch"
+tic_stackexchange_path="s3://<bucket>/<prefix>/ml-tic-lm/evaluation/stackexchange"
+tic_wiki_changed_path="s3://<bucket>/<prefix>/ml-tic-lm/evaluation/twiki_changed_textbased"
+tic_wiki_unchanged_path="s3://<bucket>/<prefix>/ml-tic-lm/evaluation/twiki_unchanged_textbased"
+tic_codedocs_numpy_path="s3://<bucket>/<prefix>/ml-tic-lm/evaluation/code_eval/numpy"
+tic_codedocs_pytorch_path="s3://<bucket>/<prefix>/ml-tic-lm/evaluation/code_eval/pytorch"
 
 # local paths
-tic_stackexchange_local_path="ml-tic-lm/evaluation/local_data/stackexchange"
-tic_wiki_changed_local_path="ml-tic-lm/evaluation/local_data/twiki_changed_textbased"
-tic_wiki_unchanged_local_path="ml-tic-lm/evaluation/local_data/twiki_unchanged_textbased"
-tic_codedocs_numpy_local_path="ml-tic-lm/evaluation/local_data/code_eval/numpy"
-tic_codedocs_pytorch_local_path="ml-tic-lm/evaluation/local_data/code_eval/pytorch"
+# Assuming current directory is `ml-tic-lm/evaluation`
+tic_stackexchange_local_path="local_data/stackexchange"
+tic_wiki_changed_local_path="local_data/twiki_changed_textbased"
+tic_wiki_unchanged_local_path="local_data/twiki_unchanged_textbased"
+tic_codedocs_numpy_local_path="local_data/code_eval/numpy"
+tic_codedocs_pytorch_local_path="local_data/code_eval/pytorch"
 
 # copy
 aws s3 cp --recursive $tic_stackexchange_path  $tic_stackexchange_local_path

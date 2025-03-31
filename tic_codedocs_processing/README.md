@@ -11,6 +11,8 @@ The current release of TiC-CodeDocs includes automated scripts for generating do
 
 Each line of the final JSONL file is a JSON object with `title` and `text` fields.
 
+Note: The following scripts may break as time passes and NumPy/PyTorch changes.
+
 
 
 ------------------------------------------------------------
@@ -28,31 +30,30 @@ Before you begin, ensure you have the following tools installed:
 
 2. Conda: The scripts will create a separate virtual environment for each release of each library and depend on Conda to manage these environments. To install Miniconda, you can run:
 ```bash
-  MINICONDA_PATH="<set path>"
+  MINICONDA_PATH="$HOME/miniconda"
   curl -L https://repo.anaconda.com/miniconda/Miniconda3-py310_24.5.0-0-Linux-x86_64.sh -o Anaconda_latest.sh && \
-  bash ./Anaconda*.sh -b -p $MINICONDA_PATH && rm ./Anaconda*.sh
-  $(conda info --base)/bin/conda install -y --only-deps anaconda && \
-  $(conda info --base)/bin/conda update -y -n base -c defaults conda && \
-  $(conda info --base)/bin/conda install -y pip
-  $(conda info --base)/bin/conda init bash
-  echo 'PATH=$(conda info --base)/bin:$PATH' >> ~/.bashrc
-  source $(conda info --base)/etc/profile.d/conda.sh
+  bash ./Anaconda*.sh -b -p $CONDA_PATH ./Anaconda*.sh
+  $CONDA_PATH/bin/conda install -y --only-deps anaconda && \
+  $CONDA_PATH/bin/conda update -y -n base -c defaults conda && \
+  $CONDA_PATH/bin/conda install -y pip
+  $CONDA_PATH/bin/conda init bash
+  echo 'PATH=$CONDA_PATH/bin:$PATH' >> ~/.bashrc
+  source $CONDA_PATH/etc/profile.d/conda.sh
   exec bash  
 ```
 
 3. Node.js & Readability: We use [readability](https://github.com/mozilla/readability) as our main tool for converting the generated HTML documentation into text. To install Node.js and Readability, run:
 ```bash
-  curl -fsSL https://deb.nodesource.com/setup_20.x -o nodesource_setup.sh
-  bash nodesource_setup.sh
-  apt-get install -y nodejs
-  npm install @mozilla/readability jsdom
+  curl -fsSL https://deb.nodesource.com/setup_20.x -o nodesource_setup.sh  
+  sudo bash nodesource_setup.sh  
+  sudo apt-get install -y nodejs  
+  npm install katex jsdom @mozilla/readability  
 ```
 Optionally, you can also use [trafilatura](https://github.com/adbar/trafilatura) instead of [readability](https://github.com/mozilla/readability) to convert HTML to text. However, we have found that Readability outperforms trafilatura in terms of accuracy and quality of extraction.
 
 ------------------------------------------------------------
 
 ## Usage
-
 
 Note: The following scripts assume the user has root access to run `apt 
 install` commands.
@@ -90,7 +91,7 @@ np_versions = {
 Similarly, for PyTorch, you can use:
 ```bash
   bash pytorch_generate.sh <VERSION> <HTML_CONVERT_METHOD>
-  # e.g., bash pytorch_generate.sh 2.6.0 readability
+  # e.g., bash pytorch_generate.sh 2.4.0 readability
 ```
 
 Supported PyTorch versions currently are:
@@ -107,10 +108,24 @@ torch_versions = {
     "2.2.0": "01/2024",
     "2.3.0": "04/2024",
     "2.4.0": "07/2024",
-    "2.5.0": "10/2024",
-    "2.6.0": "01/2025",
 }
 ```
 
-[^1]: For the experiments in our paper, we used 16 major releases of NumPy (from `v1.13.0` in 2017 to `v2.1.0` in 2024) and 11 major releases of PyTorch (from `v1.8.0` in 2021 to `v2.4.0` in 2024).
+The final `jsonl` files for LLM Foundry evaluations will be stored in 
+`./output/{numpy,pytorch}`. To run the evaluations, the data is expected to 
+exist in the following paths relative to the root of the repository:
+```bash
+tic_codedocs_numpy_local_path="local_data/code_eval/numpy"
+tic_codedocs_pytorch_local_path="local_data/code_eval/pytorch"
+```
+
+We recommend uploading them to S3 Path for future evaluations.
+```bash
+aws s3 cp output/numpy s3://<bucket/<prefix>/ml-tic-lm/evaluation/code_eval/numpy --recursive
+aws s3 cp output/pytorch s3://<bucket/<prefix>/ml-tic-lm/evaluation/code_eval/pytorch --recursive
+```
+
+[^1]: For the experiments in our paper, we used 16 major releases of NumPy 
+(from `v1.13.0` in 2017 to `v2.1.0` in 2024) and 11 major releases of PyTorch 
+(from `v1.8.0` in 2021 to `v2.4.0` in 2024).
 

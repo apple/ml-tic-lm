@@ -29,7 +29,7 @@ This software and accompanying data and models have been released under the
 following licenses:
 - Code: [Apple Sample Code License (ASCL)](./LICENSE)
 - ML models: [Apple ML Research Model TOU](./LICENSE_MODELS)
-- Data: [CC-BY-NC-ND](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+- Data: [CC-BY-NC-ND](./LICENSE_DATA) [Deed](https://creativecommons.org/licenses/by-nc-nd/4.0/)
 
 ## Citation
 

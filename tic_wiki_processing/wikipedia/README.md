@@ -135,7 +135,7 @@ export S3_BASE_PATH="s3://your-bucket-name"
    # Run the generated script
    bash diffsets_script.sh
    ```
-- Diff outputs are stored at `$S3_BASE_PATH/diffest_changed_wiki` and `$S3_BASE_PATH/diffest_unchanged_wiki`
+- Diff outputs are stored at `$S3_BASE_PATH/diffset_changed_wiki` and `$S3_BASE_PATH/diffset_unchanged_wiki`
 
 The automation scripts create workflows that efficiently manage:
 - Download → Extract → Process → Upload → Cleanup
@@ -170,8 +170,8 @@ After generating diffs, prepare data for LLM-Foundry evaluation, transform your 
 
 ```bash
 # Download the CSV files from S3
-aws s3 cp $S3_BASE_PATH/diffest_changed_wiki/wiki_diff_20180101_20171201.csv ./local_data/
-aws s3 cp $S3_BASE_PATH/diffest_unchanged_wiki/wiki_unchanged_20180101_20171201.csv ./local_data/
+aws s3 cp $S3_BASE_PATH/diffset_changed_wiki/ ./local_data/diffset_changed_wiki/ --recursive
+aws s3 cp $S3_BASE_PATH/diffset_unchanged_wiki/ ./local_data/diffset_unchanged_wiki/ --recursive
 
 # Transform and sample the CSV files, Creates ./local_data_sampled with JSONL files. 
 python transform_data.py ./local_data --num_samples 10000 --file_type csv
@@ -179,5 +179,17 @@ python transform_data.py ./local_data --num_samples 10000 --file_type csv
 # Truncate files to fit context windows, Creates ./local_data_sampled_truncated with truncated files.
 python truncate_data.py ./local_data_sampled --max_tokens 450
 ```
-then put the jsonl files under `ml-tic-lm/evaluation/local_data/twiki_changed_textbased/` in the repo for evaluation.
+
+To run the evaluations, the data is expected to exist in the following paths 
+relative to the root of the repository:
+```bash
+tic_wiki_changed_local_path="local_data/twiki_changed_textbased"
+tic_wiki_unchanged_local_path="local_data/twiki_unchanged_textbased"
+```
+
+We recommend uploading them to S3 Path for future evaluations.
+```bash
+aws s3 cp ./local_data_sampled_truncated/diffset_changed_wiki/ $S3_BASE_PATH/twiki_changed_textbased/ --recursive
+aws s3 cp ./local_data_sampled_truncated/diffset_unchanged_wiki/ $S3_BASE_PATH/twiki_unchanged_textbased/--recursive
+```
 

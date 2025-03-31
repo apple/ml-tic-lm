@@ -18,8 +18,6 @@ torch_versions = {
     "2.2.0": "01/2024",
     "2.3.0": "04/2024",
     "2.4.0": "07/2024",
-    "2.5.0": "10/2024",
-    "2.6.0": "01/2025",
 }
 
 MIN_LEN = 25
@@ -59,7 +57,7 @@ def get_text(html_path: str):
 
 def save_jsonl(data: list[dict], v: str):
     month, year = torch_versions[v].split("/")
-    save_path = f"./output/pt_{year}{month}.jsonl"
+    save_path = f"./output/pytorch/{year}{month}.jsonl"
     with open(save_path, "w") as f:
         for d in data:
             f.write(json.dumps(d, ensure_ascii=False) + "\n")
@@ -70,7 +68,7 @@ def generate(v: str, method: str):
     assert v in torch_versions
     assert method in ['readability', 'trafilatura']
     # find docs
-    root = f"./output/torch_{v}_{method}/"
+    root = f"./output/pytorch/v{v}_{method}/"
     extract_dirs = [os.path.join(root, d) for d in ["notes", "generated"]]
     search_dirs = [root] + extract_dirs
     htmls = []

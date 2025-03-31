@@ -106,7 +106,7 @@ def generate_bash_script(
             monthly_snapshots_mc_dir = os.path.join(
                 dst_category_dir, "monthly_snapshots_mc"
             )
-            llm_foundry_dir = f"{monthly_snapshots_mc_dir}_llm_foundry_format"
+            llm_foundry_dir = f"{dst_category_dir}_llm_foundry_format/monthly_snapshots_mc"
 
             command_file.append(f"# Processing {category}\n")
             command_file.append("(\n")  # Start of subshell for parallel execution
@@ -147,14 +147,14 @@ def generate_bash_script(
                 f"python create_monthly_snapshots_accepted_answers.py --input_path '{processed_posts_dir}' --post_history_path '{processed_history_dir}' --output_path '{monthly_snapshots_mc_dir}'\n"
             )
             command_file.append(
-                f"aws s3 cp '{monthly_snapshots_mc_dir}' '{s3_path}/{category}/monthly_snapshots_mc' --recursive\n"
+                f"# aws s3 cp '{monthly_snapshots_mc_dir}' '{s3_path}/{category}/monthly_snapshots_mc' --recursive   # Intermediate checkpoint, uncomment if needed\n"
             )
 
             command_file.append(
                 f"python format_qa_pairs_with_votes.py --input-dir '{monthly_snapshots_mc_dir}' --votes-file '{processed_vote_file}'\n"
             )
             command_file.append(
-                f"aws s3 cp '{llm_foundry_dir}/{category}/' '{s3_path}/{category}/' --recursive\n"
+                f"aws s3 cp '{llm_foundry_dir}/' '{s3_path}/{category}/' --recursive\n"
             )
 
             # Clean up local files

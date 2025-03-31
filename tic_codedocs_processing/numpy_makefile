@@ -1,7 +1,7 @@
 SPHINXOPTS    ?=
-SPHINXBUILD   ?= LANG=C /home/${USER}/miniconda/envs/${VENV}/bin/sphinx-build
-PYTHON   ?= /home/${USER}/miniconda/envs/${VENV}/bin/python
-ALLSPHINXOPTS  = -j 16 -d build/doctrees $(SPHINXOPTS) source
+SPHINXBUILD   ?= LANG=C ${CONDA_ROOT}/envs/${VENV}/bin/sphinx-build
+PYTHON   ?= ${CONDA_ROOT}/envs/${VENV}/bin/python
+ALLSPHINXOPTS  = -j ${NUM_THREADS} -d build/doctrees $(SPHINXOPTS) source
 
 generate: build/generate-stamp
 
