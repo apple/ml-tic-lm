@@ -21,7 +21,7 @@ pre_commit==4.1.0
 ray[all]
 loguru==0.7.3
 jsonlines==4.0.0
-transformers==4.40.2
+transformers>=4.40.2
 s3fs==0.4.2
 wikipedia==1.4.0
 ipython==8.33.0
