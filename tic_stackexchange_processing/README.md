@@ -104,3 +104,20 @@ The project implements several quality filters:
 - Token length limits for LLM compatibility
 - Minimum sample size requirements
 
+## Sample Output
+A sample extracted from Math StackExchange, on 2016-01 snapshot:
+```
+{
+    "query": "Question Title: If squaring a number means multiplying that number with itself then shouldn't taking square root of a number mean to divide a number by itself?\n\nQuestion Body: If squaring a number means multiplying that number with itself then shouldn't taking square root of a number mean to divide a number by itself? \n\nFor example the square of $2$  is $2^2=2 \\cdot 2=4 $ .\n\nBut square root of $2$ is not $\\frac{2}{2}=1$ .\n\n",
+    "choices": [
+        "`taking square root` means _reversing_ the effect of `squaring`. Dividing a number by itself does not do that (but rather always returns 1 as you noted).\n\nCompare your question to: if doubling a number means adding it to itself, shouldn't halving a number mean subtracting it from itself? Answer: obviously not.",
+        "What use is a term for dividing a number by itself?  The result is always $1$.  \nWe define the square root as the (positive) number, that when multiplied by itself, gives the desired number.  This is a very useful expression. "
+    ],
+    "gold": 0,
+    "metadata": {
+        "question_votes": 118,
+        "accepted_answer_votes": 338,
+        "lowest_voted_answer_votes": 2
+    }
+}
+```

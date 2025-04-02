@@ -7,7 +7,7 @@ The current release of TiC-CodeDocs includes automated scripts for generating do
 3. Create a standalone virtual environment (called `lib_v`) and build lib from source.
 4. Generate Sphinx HTML docs.
 5. Convert each of the generated HTML pages to text.
-6. Postprocess the text files and create a JSONL file named `lib_{YYYY}{MM}.jsonl`.
+6. Postprocess the text files and create a JSONL file named `lib/{YYYY}{MM}.jsonl`.
 
 Each line of the final JSONL file is a JSON object with `title` and `text` fields.
 
@@ -129,3 +129,17 @@ aws s3 cp output/pytorch s3://<bucket/<prefix>/ml-tic-lm/evaluation/code_eval/py
 (from `v1.13.0` in 2017 to `v2.1.0` in 2024) and 11 major releases of PyTorch 
 (from `v1.8.0` in 2021 to `v2.4.0` in 2024).
 
+---
+### Note
+  
+Open source libraries like NumPy/PyTorch often don't specify exact dependency versions, using formats like dependency_package or > x.y.z in their requirements files. This means pip installs different versions depending on when you run the installation, potentially breaking pipelines.
+For example, [NumPy v1.19's doc requirements](https://github.com/numpy/numpy/blob/v1.19.0/doc_requirements.txt) from ~5 years ago specified:
+```
+sphinx>=2.2.0,<3.0
+ipython
+scipy
+matplotlib
+```
+Running this in 2020 would install matplotlib 3.2, but today it would install matplotlib 3.10, which may break the document generation due to API changes.
+Beyond the dependencies, development processes and tools also evolve - PyTorch, for instance, is [deprecating](https://github.com/pytorch/pytorch/issues/138506) their official conda channel.
+Overall, while the scripts have been tested before the release, we note that they may stop working due to the mentioned changes.
