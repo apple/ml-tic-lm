@@ -1,10 +1,8 @@
 # TiC-LM
 
-This software project accompanies the [following research paper](https://arxiv.org/):
+This software project accompanies the [following research paper](https://arxiv.org/abs/2504.02107):
 
 TiC-LM: A Web-Scale Benchmark for Time-Continual LLM Pretraining, Li, J., Armandpour, M., Mirzadeh, I., Mehta, S., Shankar, V., Vemulapalli, R., Bengio, S., Tuzel, O., Farajtabar, M., Pouransari H., and Faghri, F., ArXiv preprint, 2025.
-
-- TODO: update link once available
 
 ## Overview
 
@@ -41,10 +39,7 @@ TiC-LM: A Web-Scale Benchmark for Time-Continual LLM Pretraining, Li, J., Armand
 @article{li2025ticlm,
   title={TiC-LM: A Web-Scale Benchmark for Time-Continual LLM Pretraining},
   author={Li, Jeffrey and Armandpour, Mohammadreza and Mirzadeh, Iman and Mehta, Sachin and Shankar, Vaishaal and Vemulapalli Raviteja and Bengio, Samy and Tuzel, Oncel and Farajtabar, Mehrdad and Pouransari, Hadi and Faghri, Fartash},
-  journal={arXiv preprint},
-  year={2025},
-  note={\url{https://arxiv.org/}}
+  journal={arXiv preprint arXiv:2504.02107},
+  year={2025}
 }
 ```
-
-- TODO: Update arxiv link once uploaded

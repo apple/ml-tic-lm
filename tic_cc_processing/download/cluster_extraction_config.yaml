@@ -39,6 +39,6 @@ setup_commands:
     - echo 'export AWS_SECRET_ACCESS_KEY=' >> ~/.bashrc
     - pip install --upgrade pip setuptools wheel
     - pip install -U "ray[default] @ https://s3-us-west-2.amazonaws.com/ray-wheels/latest/ray-3.0.0.dev0-cp310-cp310-manylinux2014_x86_64.whl"
-    - git clone <TIC_LM_REPO_URL> tic_lm # TODO: fill this in once we know release url
+    - git clone git@github.com:apple/ml-tic-lm.git tic_lm
     - pushd tic_lm/tic_cc_processing/download
     - pip install requirements.txt
