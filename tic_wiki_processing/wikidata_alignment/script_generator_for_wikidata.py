@@ -16,7 +16,7 @@ set_processed_months = set()
 
 
 # Function to add commands for processing a pair of dates
-def add_date_processing_commands(old_date, new_date):
+def add_date_processing_commands(old_date, new_date, base_path):
     process_cmd = []
     old_date_str = old_date.strftime("%Y%m%d")
     new_date_str = new_date.strftime("%Y%m%d")
@@ -25,21 +25,21 @@ def add_date_processing_commands(old_date, new_date):
     )
     if old_date_str not in set_processed_months:
         process_cmd.append(
-            f"aws s3 cp Wikidata_datasets/{old_date_str} s3://tic-lm/eval_data/temporal_wikidata_KG_v2/monthly/{old_date_str}/ --recursive && "
+            f"aws s3 cp Wikidata_datasets/{old_date_str} {base_path}temporal_wikidata_KG_v2/monthly/{old_date_str}/ --recursive && "
         )
         set_processed_months.add(old_date_str)
     if new_date_str not in set_processed_months:
         process_cmd.append(
-            f"aws s3 cp Wikidata_datasets/{new_date_str} s3://tic-lm/eval_data/temporal_wikidata_KG_v2/monthly/{new_date_str}/ --recursive && "
+            f"aws s3 cp Wikidata_datasets/{new_date_str} {base_path}temporal_wikidata_KG_v2/monthly/{new_date_str}/ --recursive && "
         )
         set_processed_months.add(new_date_str)
     process_cmd.append(
-        f"aws s3 cp Wikidata_datasets/{old_date_str}_{new_date_str} s3://tic-lm/eval_data/temporal_wikidata_KG_v2/consecutive_month_diffs/{old_date_str}_{new_date_str}/ --recursive &\n"
+        f"aws s3 cp Wikidata_datasets/{old_date_str}_{new_date_str} {base_path}temporal_wikidata_KG_v2/consecutive_month_diffs/{old_date_str}_{new_date_str}/ --recursive &\n"
     )
     return process_cmd
 
 
-def add_wikipedia_algining_commands(date_parts):
+def add_wikipedia_algining_commands(date_parts, base_path):
 
     process_cmd = []
     with open("wikidata/matching_intervals.json", "r") as file:
@@ -57,11 +57,11 @@ def add_wikipedia_algining_commands(date_parts):
         for mode in modes:
             if mode == "changed":
                 process_cmd.append(
-                    f"aws s3 cp s3://tic-lm/eval_data/diffset_changed_wiki_v2/wiki_diff_{wikipedia_end}_{wikipedia_start}.csv Wikipedia_datasets/wiki_diff_{wikipedia_end}_{wikipedia_start}.csv &\n"
+                    f"aws s3 cp {base_path}diffset_changed_wiki_v2/wiki_diff_{wikipedia_end}_{wikipedia_start}.csv Wikipedia_datasets/wiki_diff_{wikipedia_end}_{wikipedia_start}.csv &\n"
                 )
             else:
                 process_cmd.append(
-                    f"aws s3 cp s3://tic-lm/eval_data/diffset_unchanged_wiki_v2/wiki_unchanged_{wikipedia_end}_{wikipedia_start}.csv Wikipedia_datasets/wiki_unchanged_{wikipedia_end}_{wikipedia_start}.csv &\n"
+                    f"aws s3 cp {base_path}diffset_unchanged_wiki_v2/wiki_unchanged_{wikipedia_end}_{wikipedia_start}.csv Wikipedia_datasets/wiki_unchanged_{wikipedia_end}_{wikipedia_start}.csv &\n"
                 )
 
     process_cmd.append("wait\n")
@@ -81,7 +81,7 @@ def add_wikipedia_algining_commands(date_parts):
             "%Y%m%d"
         )
         process_cmd.append(
-            f"aws s3 cp Wikidata_datasets/{old_date_str}_{new_date_str} s3://tic-lm/eval_data/temporal_wikidata_KG_v2/consecutive_month_diffs/{old_date_str}_{new_date_str}/ --recursive &\n"
+            f"aws s3 cp Wikidata_datasets/{old_date_str}_{new_date_str} {base_path}temporal_wikidata_KG_v2/consecutive_month_diffs/{old_date_str}_{new_date_str}/ --recursive &\n"
         )
 
     process_cmd.append("wait\n")
@@ -115,7 +115,7 @@ def remove_local_files_not_needed(processed_months):
         return removal_commands
 
 
-def generate_bash_script_for_main_process(files):
+def generate_bash_script_for_main_process(files, base_path):
 
     # Extract and store date parts for sequence handling
     date_parts = [
@@ -138,7 +138,7 @@ def generate_bash_script_for_main_process(files):
 
     # Process non-overlapping batches
     for old_date, new_date in non_overlapping_batches:
-        process_cmd.extend(add_date_processing_commands(old_date, new_date))
+        process_cmd.extend(add_date_processing_commands(old_date, new_date, base_path))
 
     process_cmd.append(
         "\n# Wait for non-overlapping batches to complete before starting overlapping batches\n"
@@ -147,10 +147,10 @@ def generate_bash_script_for_main_process(files):
 
     # Process overlapping batches
     for old_date, new_date in overlapping_batches:
-        process_cmd.extend(add_date_processing_commands(old_date, new_date))
+        process_cmd.extend(add_date_processing_commands(old_date, new_date, base_path))
     process_cmd.append("wait\n")
 
-    process_cmd.extend(add_wikipedia_algining_commands(date_parts))
+    process_cmd.extend(add_wikipedia_algining_commands(date_parts, base_path))
     # Final message
     process_cmd.append('echo "All processes have completed."\n')
 
@@ -161,7 +161,7 @@ def generate_bash_script_for_main_process(files):
 
 
 def generate_bash_script_for_commands(
-    bucket, prefix, size_threshold=250 * 1024**3, min_date_str="20171120"
+    bucket, prefix, base_path, size_threshold=250 * 1024**3, min_date_str="20171120"
 ):  # size_threshold in bytes
     # List files and their sizes from S3
     files = list_files(bucket, prefix)
@@ -212,7 +212,7 @@ def generate_bash_script_for_commands(
             date_wiki = date_part.strftime("%Y%m%d")
             file_name = file_key.split("/")[-1]
             script_lines.append(
-                f"python -m gensim.scripts.segment_wiki -i -f {file_name} -o Wikidata_datasets/wikidata-{date_wiki}.json.gz && aws s3 cp Wikidata_datasets/wikidata-{date_wiki}.json.gz s3://tic-lm/eval_data/temporal_wikidata_compressed_processed/wikidata-{date_wiki}.json.gz &\n"
+                f"python -m gensim.scripts.segment_wiki -i -f {file_name} -o Wikidata_datasets/wikidata-{date_wiki}.json.gz && aws s3 cp Wikidata_datasets/wikidata-{date_wiki}.json.gz {base_path}temporal_wikidata_compressed_processed/wikidata-{date_wiki}.json.gz &\n"
             )
         script_lines.append("wait\n")
 
@@ -228,7 +228,7 @@ def generate_bash_script_for_commands(
             if idx_batch
             else batch_files
         )
-        script_lines.extend(generate_bash_script_for_main_process(process_files))
+        script_lines.extend(generate_bash_script_for_main_process(process_files, base_path))
 
     # Final message
     script_lines.append('echo "All processes have completed."\n')
@@ -285,4 +285,5 @@ def filter_filenames_by_date(filenames, min_date_str, max_num_outputs=200):
 if __name__ == "__main__":
     bucket = "<YOUR_BUCKET>"
     prefix = "<YOUR_PREFIX>"
-    generate_bash_script_for_commands(bucket, prefix)
+    base_path = "<YOUR_BASE_PATH>"  # e.g., "s3://<your-bucket>/eval_data/"
+    generate_bash_script_for_commands(bucket, prefix, base_path)

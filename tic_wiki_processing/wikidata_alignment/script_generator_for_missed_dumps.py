@@ -10,15 +10,6 @@ from datetime import datetime
 
 import boto3
 
-# Define the S3 buckets and paths
-base_path = "s3://tic-lm/eval_data/"
-buckets = {
-    "raw": base_path + "temporal_wikidata_compressed/",
-    "processed": base_path + "temporal_wikidata_compressed_processed/",
-    "monthly": base_path + "temporal_wikidata_KG_v2/monthly/",
-    "diffs": base_path + "temporal_wikidata_KG_v2/consecutive_month_diffs/",
-}
-
 
 def load_matching_intervals(file_path):
     try:
@@ -66,7 +57,15 @@ date_patterns = {
 }
 
 
-def main(min_date=None, num_diffs=None):
+def main(base_path, min_date=None, num_diffs=None):
+    # Define the S3 buckets and paths
+    buckets = {
+        "raw": base_path + "temporal_wikidata_compressed/",
+        "processed": base_path + "temporal_wikidata_compressed_processed/",
+        "monthly": base_path + "temporal_wikidata_KG_v2/monthly/",
+        "diffs": base_path + "temporal_wikidata_KG_v2/consecutive_month_diffs/",
+    }
+
     raw_dates = get_dates_from_s3_listing(buckets["raw"], date_patterns["raw"])
     raw_dates = sorted(set(raw_dates) - set(["20150307", "20150806"]))
     processed_dates = get_dates_from_s3_listing(
@@ -216,7 +215,7 @@ def main(min_date=None, num_diffs=None):
 
             script_lines.extend(
                 [
-                    f"aws s3 cp s3://tic-lm/eval_data/diffset_changed_wiki_v2/wiki_diff_{new_date_wiki}_{old_date_wiki}.csv Wikipedia_datasets/wiki_diff_{new_date_wiki}_{old_date_wiki}.csv &",
+                    f"aws s3 cp {base_path}diffset_changed_wiki_v2/wiki_diff_{new_date_wiki}_{old_date_wiki}.csv Wikipedia_datasets/wiki_diff_{new_date_wiki}_{old_date_wiki}.csv &",
                 ]
             )
 
@@ -239,7 +238,7 @@ def main(min_date=None, num_diffs=None):
     for wikidata_range in missing_diffs:
         old_date, new_date = wikidata_range.split("_")
         script_lines.append(
-            f"aws s3 cp Wikidata_datasets/{old_date}_{new_date} s3://tic-lm/eval_data/temporal_wikidata_KG_v2/consecutive_month_diffs/{old_date}_{new_date}/ --recursive &"
+            f"aws s3 cp Wikidata_datasets/{old_date}_{new_date} {base_path}temporal_wikidata_KG_v2/consecutive_month_diffs/{old_date}_{new_date}/ --recursive &"
         )
 
     script_lines.append("wait")
@@ -264,6 +263,12 @@ if __name__ == "__main__":
         description="Generate script for processing missing diffs."
     )
     parser.add_argument(
+        "--base_path",
+        type=str,
+        required=True,
+        help="S3 base path (e.g., s3://<your-bucket>/eval_data/)"
+    )
+    parser.add_argument(
         "--min_date", type=str, help="Minimum date to process (YYYYMMDD format)"
     )
     parser.add_argument(
@@ -271,4 +276,9 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    main(min_date=args.min_date, num_diffs=args.num_diffs)
+    # Ensure base_path ends with /
+    base_path = args.base_path
+    if not base_path.endswith('/'):
+        base_path += '/'
+
+    main(base_path=base_path, min_date=args.min_date, num_diffs=args.num_diffs)

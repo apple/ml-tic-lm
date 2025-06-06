@@ -175,6 +175,7 @@ This generates a script that:
 For handling missed dumps:
 ```bash
 python script_generator_for_missed_dumps.py \
+    --base_path s3://<your-bucket>/eval_data/ \
     --min_date 20230101 \
     --num_diffs 3
 ```

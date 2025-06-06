@@ -105,7 +105,7 @@ This repository includes several scripts that automate the above processes for b
 For convenience, you can set an environment variable for your S3 base path:
 
 ```bash
-export S3_BASE_PATH="s3://your-bucket-name"
+export S3_BASE_PATH="s3://<your-bucket>"
 ```
 
 1. **`download_wikipedia.py`**: Generates a bash script that automates Wikipedia dump downloads:
