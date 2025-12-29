@@ -25,7 +25,7 @@ transformers>=4.40.2
 s3fs==0.4.2
 wikipedia==1.4.0
 ipython==8.33.0
-filelock==3.15.4
+filelock==3.20.1
 flash_attn==2.6.1
 llm-foundry==0.8.0
 mosaicml==0.22.0
