@@ -7,6 +7,7 @@ This software project accompanies the following research paper:
 ## Overview
 
 We provide a high-level overview of the structure and main components (i.e., dataset creation, training, evaluation) of this codebase:
+- [`models`](models/) contains instructions for downloading the Oracle models and their evaluation metrics.
 - [`tic_cc_processing`](tic_cc_processing/) contains the code for generating both the TiC-CC trianing dataset and heldout evaluation sets
 - [`tic_wiki_processing`](tic_wiki_processing/), [`tic_stackexchange_processing`](tic_stackexchange_proecssing/), and [`tic_codedocs_processing`](tic_codedocs_processing/) each contain the code for generating the TiC-Wiki, TiC-Stackexchange, and TiC-CodeDocs evaluations respectively
 - [`training`](training/) contains code for running the various continual learning methods that we benchmark in our paper

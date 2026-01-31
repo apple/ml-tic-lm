@@ -1,0 +1,31 @@
+{
+    "name": "eval_configs/downstream_evals/core",
+    "model": "open_lm_3b",
+    "creation_date": "2024_11_18-19_15_13",
+    "eval_metrics": {
+        "icl": {
+            "hellaswag_zeroshot": 0.6903007626533508,
+            "jeopardy": 0.3840286910533905,
+            "bigbench_qa_wikidata": 0.6681757569313049,
+            "arc_easy": 0.6683501601219177,
+            "arc_challenge": 0.3737201392650604,
+            "copa": 0.7699999809265137,
+            "commonsense_qa": 0.2678132653236389,
+            "piqa": 0.7720348238945007,
+            "openbook_qa": 0.41600000858306885,
+            "lambada_openai": 0.6687366366386414,
+            "hellaswag": 0.7014538645744324,
+            "winograd": 0.831501841545105,
+            "winogrande": 0.6558800339698792,
+            "bigbench_dyck_languages": 0.22200000286102295,
+            "agi_eval_lsat_ar": 0.19130434095859528,
+            "bigbench_cs_algorithms": 0.3598484992980957,
+            "bigbench_operators": 0.190476194024086,
+            "bigbench_repeat_copy_logic": 0.0625,
+            "squad": 0.47256386280059814,
+            "coqa": 0.376299649477005,
+            "boolq": 0.6718654632568359,
+            "bigbench_language_identification": 0.25699999928474426
+        }
+    }
+}
