@@ -1,5 +1,5 @@
 smart-open
-datasets==2.5.2
+datasets>=2.5.2
 nltk
 qwikidata
 wikidata

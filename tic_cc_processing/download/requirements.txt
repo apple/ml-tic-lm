@@ -1,7 +1,7 @@
 loguru
 jsonlines
-pandas==2.1.4
-resiliparse==0.14.7
+pandas>=2.1.4
+resiliparse>=0.14.7
 trafilatura
 fastwarc
 zstandard
